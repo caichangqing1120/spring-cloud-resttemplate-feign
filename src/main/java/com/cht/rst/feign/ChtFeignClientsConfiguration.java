@@ -1,13 +1,17 @@
 package com.cht.rst.feign;
 
 import com.cht.rst.feign.inner.ChtFeign;
+import com.cht.rst.feign.inner.Client;
 import com.cht.rst.feign.inner.Logger;
+import com.cht.rst.feign.inner.RestTemplateClient;
 import com.cht.rst.feign.inner.Retryer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class ChtFeignClientsConfiguration {
@@ -22,8 +26,13 @@ public class ChtFeignClientsConfiguration {
     }
 
     @Bean
+    @ConditionalOnBean(RestTemplate.class)
+    public Client feignClient(RestTemplate restTemplate) {
+        return new RestTemplateClient(restTemplate);
+    }
+
+    @Bean
     @Scope("prototype")
-    @ConditionalOnMissingBean
     public ChtFeign.Builder feignBuilder(Retryer retryer) {
         return ChtFeign.builder().retryer(retryer);
     }

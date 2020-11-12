@@ -45,6 +45,11 @@ public abstract class ChtFeign {
             return this;
         }
 
+        public ChtFeign.Builder client(Client client) {
+            this.client = client;
+            return this;
+        }
+
         public <T> T target(Class<T> apiType, String url) {
             return target(new Target.HardCodedTarget<T>(apiType, url));
         }

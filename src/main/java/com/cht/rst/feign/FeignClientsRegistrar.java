@@ -76,13 +76,40 @@ public class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar,
                     Map<String, Object> attributes = annotationMetadata
                             .getAnnotationAttributes(ChtFeignClient.class.getCanonicalName());
 
-//                    String name = getClientName(attributes);
-//                    registerClientConfiguration(registry, name, attributes.get("configuration"));
+                    String name = getClientName(attributes);
+                    registerClientConfiguration(registry, name, attributes.get("configuration"));
 
                     registerFeignClient(registry, annotationMetadata, attributes);
                 }
             }
         }
+    }
+
+    private void registerClientConfiguration(BeanDefinitionRegistry registry, Object name,
+                                             Object configuration) {
+        BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(ChtFeignClientSpecification.class);
+        builder.addConstructorArgValue(name);
+        builder.addConstructorArgValue(configuration);
+        registry.registerBeanDefinition(name + "." + ChtFeignClientSpecification.class.getSimpleName(),
+                builder.getBeanDefinition());
+    }
+
+    private String getClientName(Map<String, Object> client) {
+        if (client == null) {
+            return null;
+        }
+        String value = (String) client.get("contextId");
+        if (!StringUtils.hasText(value)) {
+            value = (String) client.get("value");
+        }
+        if (!StringUtils.hasText(value)) {
+            value = (String) client.get("name");
+        }
+        if (StringUtils.hasText(value)) {
+            return value;
+        }
+
+        throw new IllegalStateException("Either 'name' or 'value' must be provided in @" + ChtFeignClient.class.getSimpleName());
     }
 
     private void registerFeignClient(BeanDefinitionRegistry registry,

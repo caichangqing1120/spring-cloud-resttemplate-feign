@@ -18,7 +18,11 @@ public class RetryableRestTemplate {
 
     private UriTemplateHandler uriTemplateHandler = new DefaultUriBuilderFactory();
 
-    private RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+
+    public RetryableRestTemplate(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     public <T> T execute(HttpMethod method, String baseUrl, String path, Object request,
                           Class<T> responseType, Map<String, String> queryParams, Object... uriVariables) {

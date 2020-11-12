@@ -2,8 +2,8 @@ package com.cht.rst.feign.inner;
 
 import com.google.common.collect.Maps;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
@@ -12,10 +12,14 @@ public class RestTemplateClient implements Client {
     private final RetryableRestTemplate delegate;
 
     public RestTemplateClient() {
-        this(new RetryableRestTemplate());
+        this(new RetryableRestTemplate(new RestTemplate()));
     }
 
-    public RestTemplateClient(RetryableRestTemplate delegate) {
+    public RestTemplateClient(RestTemplate restTemplate) {
+        this(new RetryableRestTemplate(restTemplate));
+    }
+
+    private RestTemplateClient(RetryableRestTemplate delegate) {
         this.delegate = delegate;
     }
 
