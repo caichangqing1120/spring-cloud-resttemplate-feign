@@ -1,5 +1,8 @@
 package com.cht.rst.feign;
 
+import com.cht.rst.feign.annotatin.PathVariableParameterProcessor;
+import com.cht.rst.feign.annotatin.RequestHeaderParameterProcessor;
+import com.cht.rst.feign.annotatin.RequestParamParameterProcessor;
 import com.cht.rst.feign.inner.ChtFeign;
 import com.cht.rst.feign.inner.ChtFeignRequestTemplate;
 import com.cht.rst.feign.inner.Contract;
@@ -7,12 +10,10 @@ import com.cht.rst.feign.inner.MethodMetadata;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
@@ -23,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,24 +38,16 @@ import static com.cht.rst.feign.inner.Util.emptyToNull;
 
 /**
  * Base on Spring MVC Annotation's for parse method which with to be called
+ *
  * @author cht
  */
 public class SpringMvcContract extends Contract.BaseContract implements ResourceLoaderAware {
-
-    private static final String ACCEPT = "Accept";
-
-    private static final String CONTENT_TYPE = "Content-Type";
-
-    private static final TypeDescriptor STRING_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
-    private static final TypeDescriptor ITERABLE_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Iterable.class);
 
     private static final ParameterNameDiscoverer PARAMETER_NAME_DISCOVERER = new DefaultParameterNameDiscoverer();
 
     private final Map<Class<? extends Annotation>, AnnotatedParameterProcessor> annotatedArgumentProcessors;
     private final Map<String, Method> processedMethods = new HashMap<>();
 
-    private final ConversionService conversionService;
-//    private final SpringMvcContract.ConvertingExpanderFactory convertingExpanderFactory;
     private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
     public SpringMvcContract() {
@@ -74,15 +66,9 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
                 "Parameter processors can not be null.");
         Assert.notNull(conversionService, "ConversionService can not be null.");
 
-        List<AnnotatedParameterProcessor> processors;
-//        if (!annotatedParameterProcessors.isEmpty()) {
-            processors = new ArrayList<>(annotatedParameterProcessors);
-//        } else {
-//            processors = getDefaultAnnotatedArgumentsProcessors();
-//        }
+        List<AnnotatedParameterProcessor> processors = getDefaultAnnotatedArgumentsProcessors();
+
         this.annotatedArgumentProcessors = toAnnotatedArgumentProcessorMap(processors);
-        this.conversionService = conversionService;
-//        this.convertingExpanderFactory = new SpringMvcContract.ConvertingExpanderFactory(conversionService);
     }
 
     @Override
@@ -91,46 +77,10 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
     }
 
     @Override
-    protected void processAnnotationOnClass(MethodMetadata data, Class<?> clz) {
-//        if (clz.getInterfaces().length == 0) {
-//            RequestMapping classAnnotation = AnnotatedElementUtils.findMergedAnnotation(clz, RequestMapping.class);
-//            if (classAnnotation != null) {
-//                // Prepend path from class annotation if specified
-//                if (classAnnotation.value().length > 0) {
-//                    String pathValue = emptyToNull(classAnnotation.value()[0]);
-//                    pathValue = resolve(pathValue);
-//                    if (!pathValue.startsWith("/")) {
-//                        pathValue = "/" + pathValue;
-//                    }
-//                    data.template().uri(pathValue);
-//                }
-//            }
-//        }
-    }
-
-    @Override
     public MethodMetadata parseAndValidateMetadata(Class<?> targetType, Method method) {
 
         this.processedMethods.put(ChtFeign.configKey(targetType, method), method);
-        MethodMetadata md = super.parseAndValidateMetadata(targetType, method);
-
-        RequestMapping classAnnotation = AnnotatedElementUtils.findMergedAnnotation(targetType, RequestMapping.class);
-//        if (classAnnotation != null) {
-//            // produces - use from class annotation only if method has not specified this
-//            if (!md.template().headers().containsKey(ACCEPT)) {
-//                parseProduces(md, method, classAnnotation);
-//            }
-//
-//            // consumes -- use from class annotation only if method has not specified this
-//            if (!md.template().headers().containsKey(CONTENT_TYPE)) {
-//                parseConsumes(md, method, classAnnotation);
-//            }
-//
-//            // headers -- class annotation is inherited to methods, always write these if
-//            // present
-//            parseHeaders(md, method, classAnnotation);
-//        }
-        return md;
+        return super.parseAndValidateMetadata(targetType, method);
     }
 
     @Override
@@ -154,25 +104,16 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
         if (methodMapping.value().length > 0) {
             String pathValue = emptyToNull(methodMapping.value()[0]);
             if (pathValue != null) {
+                //解析url，使用spring环境中的变量
                 pathValue = resolve(pathValue);
                 // Append path from @RequestMapping if value is present on method
                 if (!pathValue.startsWith("/") && !data.template().path().endsWith("/")) {
                     pathValue = "/" + pathValue;
                 }
+                //设置后url
                 data.template().setUrlPart(pathValue);
             }
         }
-
-        // produces
-//        parseProduces(data, method, methodMapping);
-//
-//        // consumes
-//        parseConsumes(data, method, methodMapping);
-//
-//        // headers
-//        parseHeaders(data, method, methodMapping);
-
-//        data.indexToExpander(new LinkedHashMap<Integer, Param.Expander>());
     }
 
     private String resolve(String value) {
@@ -206,85 +147,21 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
                 new SpringMvcContract.SimpleAnnotatedParameterContext(data, paramIndex);
         Method method = this.processedMethods.get(data.configKey());
         for (Annotation parameterAnnotation : annotations) {
-            AnnotatedParameterProcessor processor = this.annotatedArgumentProcessors
-                    .get(parameterAnnotation.annotationType());
+            //策略模式
+            AnnotatedParameterProcessor processor =
+                    this.annotatedArgumentProcessors.get(parameterAnnotation.annotationType());
             if (processor != null) {
                 Annotation processParameterAnnotation;
                 // synthesize, handling @AliasFor, while falling back to parameter name on
                 // missing String #value():
                 processParameterAnnotation = synthesizeWithMethodParameterNameAsFallbackValue(
                         parameterAnnotation, method, paramIndex);
-                isHttpAnnotation |= processor.processArgument(context,
-                        processParameterAnnotation, method);
+                //use processor to parse argument
+                isHttpAnnotation |= processor.processArgument(context, processParameterAnnotation, method);
             }
         }
-
-//        if (isHttpAnnotation && data.indexToExpander().get(paramIndex) == null) {
-//            TypeDescriptor typeDescriptor = createTypeDescriptor(method, paramIndex);
-//            if (conversionService.canConvert(typeDescriptor, STRING_TYPE_DESCRIPTOR)) {
-//                Param.Expander expander =
-//                        convertingExpanderFactory.getExpander(typeDescriptor);
-//                if (expander != null) {
-//                    data.indexToExpander().put(paramIndex, expander);
-//                }
-//            }
-//        }
         return isHttpAnnotation;
     }
-
-    private static TypeDescriptor createTypeDescriptor(Method method, int paramIndex) {
-        Parameter parameter = method.getParameters()[paramIndex];
-        MethodParameter methodParameter = MethodParameter.forParameter(parameter);
-        TypeDescriptor typeDescriptor = new TypeDescriptor(methodParameter);
-
-        // Feign applies the Param.Expander to each element of an Iterable, so in those
-        // cases we need to provide a TypeDescriptor of the element.
-        if (typeDescriptor.isAssignableTo(ITERABLE_TYPE_DESCRIPTOR)) {
-            TypeDescriptor elementTypeDescriptor =
-                    typeDescriptor.getElementTypeDescriptor();
-
-            checkState(elementTypeDescriptor != null,
-                    "Could not resolve element type of Iterable type %s. Not declared?",
-                    typeDescriptor);
-
-            typeDescriptor = elementTypeDescriptor;
-        }
-        return typeDescriptor;
-    }
-
-//    private void parseProduces(MethodMetadata md, Method method,
-//                               RequestMapping annotation) {
-//        String[] serverProduces = annotation.produces();
-//        String clientAccepts = serverProduces.length == 0 ? null
-//                : emptyToNull(serverProduces[0]);
-//        if (clientAccepts != null) {
-//            md.template().header(ACCEPT, clientAccepts);
-//        }
-//    }
-
-//    private void parseConsumes(MethodMetadata md, Method method,
-//                               RequestMapping annotation) {
-//        String[] serverConsumes = annotation.consumes();
-//        String clientProduces = serverConsumes.length == 0 ? null
-//                : emptyToNull(serverConsumes[0]);
-//        if (clientProduces != null) {
-//            md.template().header(CONTENT_TYPE, clientProduces);
-//        }
-//    }
-
-//    private void parseHeaders(MethodMetadata md, Method method,
-//                              RequestMapping annotation) {
-//        // TODO: only supports one header value per key
-//        if (annotation.headers() != null && annotation.headers().length > 0) {
-//            for (String header : annotation.headers()) {
-//                int index = header.indexOf('=');
-//                if (!header.contains("!=") && index >= 0) {
-//                    md.template().header(resolve(header.substring(0, index)),
-//                            resolve(header.substring(index + 1).trim()));
-//                }
-//            }
-//        }
-//    }
 
     private Map<Class<? extends Annotation>, AnnotatedParameterProcessor> toAnnotatedArgumentProcessorMap(
             List<AnnotatedParameterProcessor> processors) {
@@ -295,34 +172,29 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
         return result;
     }
 
-//    private List<AnnotatedParameterProcessor> getDefaultAnnotatedArgumentsProcessors() {
-//
-//        List<AnnotatedParameterProcessor> annotatedArgumentResolvers = new ArrayList<>();
-//
-//        annotatedArgumentResolvers.add(new PathVariableParameterProcessor());
-//        annotatedArgumentResolvers.add(new RequestParamParameterProcessor());
-//        annotatedArgumentResolvers.add(new RequestHeaderParameterProcessor());
-//        annotatedArgumentResolvers.add(new QueryMapParameterProcessor());
-//
-//        return annotatedArgumentResolvers;
-//    }
+    private List<AnnotatedParameterProcessor> getDefaultAnnotatedArgumentsProcessors() {
+
+        List<AnnotatedParameterProcessor> annotatedArgumentResolvers = new ArrayList<>();
+
+        annotatedArgumentResolvers.add(new PathVariableParameterProcessor());
+        annotatedArgumentResolvers.add(new RequestParamParameterProcessor());
+        annotatedArgumentResolvers.add(new RequestHeaderParameterProcessor());
+
+        return annotatedArgumentResolvers;
+    }
 
     private Annotation synthesizeWithMethodParameterNameAsFallbackValue(
             Annotation parameterAnnotation, Method method, int parameterIndex) {
-        Map<String, Object> annotationAttributes = AnnotationUtils
-                .getAnnotationAttributes(parameterAnnotation);
+        Map<String, Object> annotationAttributes = AnnotationUtils.getAnnotationAttributes(parameterAnnotation);
         Object defaultValue = AnnotationUtils.getDefaultValue(parameterAnnotation);
-        if (defaultValue instanceof String
-                && defaultValue.equals(annotationAttributes.get(AnnotationUtils.VALUE))) {
+        if (defaultValue instanceof String && defaultValue.equals(annotationAttributes.get(AnnotationUtils.VALUE))) {
             Type[] parameterTypes = method.getGenericParameterTypes();
             String[] parameterNames = PARAMETER_NAME_DISCOVERER.getParameterNames(method);
             if (shouldAddParameterName(parameterIndex, parameterTypes, parameterNames)) {
-                annotationAttributes.put(AnnotationUtils.VALUE,
-                        parameterNames[parameterIndex]);
+                annotationAttributes.put(AnnotationUtils.VALUE, parameterNames[parameterIndex]);
             }
         }
-        return AnnotationUtils.synthesizeAnnotation(annotationAttributes,
-                parameterAnnotation.annotationType(), null);
+        return AnnotationUtils.synthesizeAnnotation(annotationAttributes, parameterAnnotation.annotationType(), null);
     }
 
     private boolean shouldAddParameterName(int parameterIndex, Type[] parameterTypes, String[] parameterNames) {
@@ -332,15 +204,13 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
                 && parameterTypes != null && parameterTypes.length > parameterIndex;
     }
 
-    private class SimpleAnnotatedParameterContext
-            implements AnnotatedParameterProcessor.AnnotatedParameterContext {
+    private class SimpleAnnotatedParameterContext implements AnnotatedParameterProcessor.AnnotatedParameterContext {
 
         private final MethodMetadata methodMetadata;
 
         private final int parameterIndex;
 
-        public SimpleAnnotatedParameterContext(MethodMetadata methodMetadata,
-                                               int parameterIndex) {
+        public SimpleAnnotatedParameterContext(MethodMetadata methodMetadata, int parameterIndex) {
             this.methodMetadata = methodMetadata;
             this.parameterIndex = parameterIndex;
         }
@@ -361,45 +231,14 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
         }
 
         @Override
+        public void setUrivariableIndex() {
+            nameParam2(this.methodMetadata, this.parameterIndex);
+        }
+
+        @Override
         public Collection<String> setTemplateParameter(String name,
                                                        Collection<String> rest) {
             return FeignUtils.addTemplateParameter(rest, name);
         }
     }
-
-    /**
-     * @deprecated Not used internally anymore. Will be removed in the future.
-     */
-//    @Deprecated
-//    public static class ConvertingExpander implements Param.Expander {
-//
-//        private final ConversionService conversionService;
-//
-//        public ConvertingExpander(ConversionService conversionService) {
-//            this.conversionService = conversionService;
-//        }
-//
-//        @Override
-//        public String expand(Object value) {
-//            return this.conversionService.convert(value, String.class);
-//        }
-//
-//    }
-
-//    private static class ConvertingExpanderFactory {
-//
-//        private final ConversionService conversionService;
-//
-//        ConvertingExpanderFactory(ConversionService conversionService) {
-//            this.conversionService = conversionService;
-//        }
-//
-//        Param.Expander getExpander(TypeDescriptor typeDescriptor) {
-//            return value -> {
-//                Object converted = this.conversionService.convert(
-//                        value, typeDescriptor, STRING_TYPE_DESCRIPTOR);
-//                return (String) converted;
-//            };
-//        }
-//    }
 }

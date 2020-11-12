@@ -24,9 +24,9 @@ public class ChtFeignRequestTemplate<T> implements Serializable {
     }
 
     public ChtFeignRequestTemplate(String baseUrl,
-                                    String urlPart,
-                                    HttpMethod method,
-                                    MethodMetadata methodMetadata) {
+                                   String urlPart,
+                                   HttpMethod method,
+                                   MethodMetadata methodMetadata) {
         this.baseUrl = baseUrl;
         this.urlPart = urlPart;
         this.method = method;
@@ -50,6 +50,17 @@ public class ChtFeignRequestTemplate<T> implements Serializable {
     }
 
     public void setBaseUrl(String baseUrl) {
+        /* target can be empty */
+        if (Util.isBlank(baseUrl)) {
+        }
+
+        /* verify that the target contains the scheme, host and port */
+        if (!(baseUrl != null && !baseUrl.isEmpty() && baseUrl.startsWith("http"))) {
+            throw new IllegalArgumentException("target values must be absolute.");
+        }
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
         this.baseUrl = baseUrl;
     }
 
@@ -78,12 +89,13 @@ public class ChtFeignRequestTemplate<T> implements Serializable {
     }
 
     public String path() {
+
         StringBuilder path = new StringBuilder();
         if (this.baseUrl != null) {
             path.append(this.baseUrl);
         }
         if (this.urlPart != null) {
-            path.append(this.urlPart.toString());
+            path.append(this.urlPart);
         }
         if (path.length() == 0) {
             /* no path indicates the root uri */
@@ -92,14 +104,8 @@ public class ChtFeignRequestTemplate<T> implements Serializable {
         return path.toString();
     }
 
-    public String url() {
-        StringBuilder url = new StringBuilder(this.path());
-        return url.toString();
+    public ChtFeignRequestTemplate methodMetadata(MethodMetadata methodMetadata) {
+        this.methodMetadata = methodMetadata;
+        return this;
     }
-
-
-//    public Request request() {
-//        return Request.create(this.method, this.url(), this.headers(), this.requestBody());
-//    }
-
 }

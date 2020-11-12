@@ -75,6 +75,8 @@ public interface AnnotatedParameterProcessor {
          */
         void setParameterName(String name);
 
+        void setUrivariableIndex();
+
         /**
          * Sets the template parameter.
          *

@@ -1,6 +1,10 @@
 package com.cht.rst.feign.inner;
 
-import java.io.IOException;
+import com.google.common.collect.Maps;
+import org.springframework.util.CollectionUtils;
+
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 
 public class RestTemplateClient implements Client {
@@ -16,12 +20,29 @@ public class RestTemplateClient implements Client {
     }
 
     @Override
-    public <T> T execute(ChtFeignRequestTemplate request, Object[] argv, Class<T> returnType) throws IOException {
+    public <T> T execute(ChtFeignRequestTemplate request, Object[] argv) {
+
+        MethodMetadata methodMetadata = request.getMethodMetadata();
+        Object requestBody = Objects.nonNull(argv) && Objects.nonNull(methodMetadata.bodyIndex()) ?
+                argv[methodMetadata.bodyIndex()] : null;
+        Object[] uriValues = Objects.nonNull(argv) && !CollectionUtils.isEmpty(methodMetadata.uriVariableIndex()) ?
+                methodMetadata.uriVariableIndex().stream().map(index -> argv[index]).toArray() : null;
+        Class<T> returnType = methodMetadata.returnType();
+        Map<String, String> queryParams = Maps.newHashMap();
+        if(!CollectionUtils.isEmpty(methodMetadata.indexToName())){
+            for (Map.Entry<Integer, String> entry : methodMetadata.indexToName().entrySet()) {
+                queryParams.put(entry.getValue(), argv[entry.getKey()].toString());
+            }
+        }
+        String urlPart = request.getUrlPart();
+
         return delegate.execute(request.getMethod(),
                 request.getBaseUrl(),
-                request.getUrlPart(),
-                Objects.isNull(argv) || argv.length == 0 ? null : argv[0],
-                returnType
+                urlPart,
+                requestBody,
+                returnType,
+                queryParams,
+                uriValues
         );
     }
 }

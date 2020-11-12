@@ -20,8 +20,6 @@ import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-//import org.jvnet.animal_sniffer.IgnoreJRERequirement;
-
 /**
  * Handles default methods by directly invoking the default method code on the interface. The bindTo
  * method must be called on the result before invoke is called.

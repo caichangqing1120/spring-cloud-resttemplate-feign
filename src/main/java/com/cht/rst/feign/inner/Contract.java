@@ -3,15 +3,11 @@ package com.cht.rst.feign.inner;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import static com.cht.rst.feign.inner.Util.checkState;
 
@@ -69,101 +65,40 @@ public interface Contract {
         protected MethodMetadata parseAndValidateMetadata(Class<?> targetType, Method method) {
 
             MethodMetadata data = new MethodMetadata();
-            data.targetType(targetType);
-            data.method(method);
             data.returnType(method.getReturnType());
             data.configKey(ChtFeign.configKey(targetType, method));
 
-            if (targetType.getInterfaces().length == 1) {
-                processAnnotationOnClass(data, targetType.getInterfaces()[0]);
-            }
-            processAnnotationOnClass(data, targetType);
-
             for (Annotation methodAnnotation : method.getAnnotations()) {
+                //解析方法上的注解
                 processAnnotationOnMethod(data, methodAnnotation, method);
             }
             checkState(data.template().method() != null,
                     "Method %s not annotated with HTTP method type (ex. GET, POST)",
                     method.getName());
+            //参数类型
             Class<?>[] parameterTypes = method.getParameterTypes();
+            //参数泛型类型
             Type[] genericParameterTypes = method.getGenericParameterTypes();
-
+            //参数注解
             Annotation[][] parameterAnnotations = method.getParameterAnnotations();
             int count = parameterAnnotations.length;
             for (int i = 0; i < count; i++) {
-                boolean isHttpAnnotation = false;
+                boolean isHttpAnnotation = false; //是否是http注解而非requestBody
                 if (parameterAnnotations[i] != null) {
+                    //解析参数上的注解
                     isHttpAnnotation = processAnnotationsOnParameter(data, parameterAnnotations[i], i);
                 }
-                if (parameterTypes[i] == URI.class) {
-                    data.urlIndex(i);
-                } else if (!isHttpAnnotation) {
+                if (!isHttpAnnotation) {
+                    //说明是requestBody
                     checkState(data.formParams().isEmpty(),
                             "Body parameters cannot be used with form parameters.");
                     checkState(data.bodyIndex() == null, "Method has too many Body parameters: %s", method);
                     data.bodyIndex(i);
-                    data.bodyType(Types.resolve(targetType, targetType, genericParameterTypes[i]));
-                }
-            }
-
-            if (data.headerMapIndex() != null) {
-                checkMapString("HeaderMap", parameterTypes[data.headerMapIndex()],
-                        genericParameterTypes[data.headerMapIndex()]);
-            }
-
-            if (data.queryMapIndex() != null) {
-                if (Map.class.isAssignableFrom(parameterTypes[data.queryMapIndex()])) {
-                    checkMapKeys("QueryMap", genericParameterTypes[data.queryMapIndex()]);
                 }
             }
 
             return data;
         }
-
-        private static void checkMapString(String name, Class<?> type, Type genericType) {
-            checkState(Map.class.isAssignableFrom(type),
-                    "%s parameter must be a Map: %s", name, type);
-            checkMapKeys(name, genericType);
-        }
-
-        private static void checkMapKeys(String name, Type genericType) {
-            Class<?> keyClass = null;
-
-            // assume our type parameterized
-            if (ParameterizedType.class.isAssignableFrom(genericType.getClass())) {
-                Type[] parameterTypes = ((ParameterizedType) genericType).getActualTypeArguments();
-                keyClass = (Class<?>) parameterTypes[0];
-            } else if (genericType instanceof Class<?>) {
-                // raw class, type parameters cannot be inferred directly, but we can scan any extended
-                // interfaces looking for any explict types
-                Type[] interfaces = ((Class) genericType).getGenericInterfaces();
-                if (interfaces != null) {
-                    for (Type extended : interfaces) {
-                        if (ParameterizedType.class.isAssignableFrom(extended.getClass())) {
-                            // use the first extended interface we find.
-                            Type[] parameterTypes = ((ParameterizedType) extended).getActualTypeArguments();
-                            keyClass = (Class<?>) parameterTypes[0];
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (keyClass != null) {
-                checkState(String.class.equals(keyClass),
-                        "%s key must be a String: %s", name, keyClass.getSimpleName());
-            }
-        }
-
-
-        /**
-         * Called by parseAndValidateMetadata twice, first on the declaring class, then on the target
-         * type (unless they are the same).
-         *
-         * @param data metadata collected so far relating to the current java method.
-         * @param clz  the class to process
-         */
-        protected abstract void processAnnotationOnClass(MethodMetadata data, Class<?> clz);
 
         /**
          * @param data       metadata collected so far relating to the current java method.
@@ -190,120 +125,15 @@ public interface Contract {
          * links a parameter name to its index in the method signature.
          */
         protected void nameParam(MethodMetadata data, String name, int i) {
-            Collection<String> names =
-                    data.indexToName().containsKey(i) ? data.indexToName().get(i) : new ArrayList<String>();
-            names.add(name);
-            data.indexToName().put(i, names);
+            data.indexToName().put(i, name);
         }
+
+        protected void nameParam2(MethodMetadata data, int i) {
+
+            //添加位置
+            data.uriVariableIndex().add(i);
+        }
+
     }
 
-    class Default extends BaseContract {
-
-        static final Pattern REQUEST_LINE_PATTERN = Pattern.compile("^([A-Z]+)[ ]*(.*)$");
-
-        @Override
-        protected void processAnnotationOnClass(MethodMetadata data, Class<?> targetType) {
-//            if (targetType.isAnnotationPresent(Headers.class)) {
-//                String[] headersOnType = targetType.getAnnotation(Headers.class).value();
-//                checkState(headersOnType.length > 0, "Headers annotation was empty on type %s.",
-//                        targetType.getName());
-//                Map<String, Collection<String>> headers = toMap(headersOnType);
-//                headers.putAll(data.template().headers());
-//                data.template().headers(null); // to clear
-//                data.template().headers(headers);
-//            }
-        }
-
-        @Override
-        protected void processAnnotationOnMethod(MethodMetadata data,
-                                                 Annotation methodAnnotation,
-                                                 Method method) {
-//            Class<? extends Annotation> annotationType = methodAnnotation.annotationType();
-//            if (annotationType == RequestLine.class) {
-//                String requestLine = RequestLine.class.cast(methodAnnotation).value();
-//                checkState(emptyToNull(requestLine) != null,
-//                        "RequestLine annotation was empty on method %s.", method.getName());
-//
-//                Matcher requestLineMatcher = REQUEST_LINE_PATTERN.matcher(requestLine);
-//                if (!requestLineMatcher.find()) {
-//                    throw new IllegalStateException(String.format(
-//                            "RequestLine annotation didn't start with an HTTP verb on method %s",
-//                            method.getName()));
-//                } else {
-//                    data.template().method(HttpMethod.valueOf(requestLineMatcher.group(1)));
-//                    data.template().uri(requestLineMatcher.group(2));
-//                }
-//                data.template().decodeSlash(RequestLine.class.cast(methodAnnotation).decodeSlash());
-//                data.template()
-//                        .collectionFormat(RequestLine.class.cast(methodAnnotation).collectionFormat());
-//
-//            } else if (annotationType == Body.class) {
-//                String body = Body.class.cast(methodAnnotation).value();
-//                checkState(emptyToNull(body) != null, "Body annotation was empty on method %s.",
-//                        method.getName());
-//                if (body.indexOf('{') == -1) {
-//                    data.template().body(body);
-//                } else {
-//                    data.template().bodyTemplate(body);
-//                }
-//            } else if (annotationType == Headers.class) {
-//                String[] headersOnMethod = Headers.class.cast(methodAnnotation).value();
-//                checkState(headersOnMethod.length > 0, "Headers annotation was empty on method %s.",
-//                        method.getName());
-//                data.template().headers(toMap(headersOnMethod));
-//            }
-        }
-
-        @Override
-        protected boolean processAnnotationsOnParameter(MethodMetadata data,
-                                                        Annotation[] annotations,
-                                                        int paramIndex) {
-            boolean isHttpAnnotation = false;
-//            for (Annotation annotation : annotations) {
-//                Class<? extends Annotation> annotationType = annotation.annotationType();
-//                if (annotationType == Param.class) {
-//                    Param paramAnnotation = (Param) annotation;
-//                    String name = paramAnnotation.value();
-//                    checkState(emptyToNull(name) != null, "Param annotation was empty on param %s.",
-//                            paramIndex);
-//                    nameParam(data, name, paramIndex);
-//                    Class<? extends Param.Expander> expander = paramAnnotation.expander();
-//                    if (expander != Param.ToStringExpander.class) {
-//                        data.indexToExpanderClass().put(paramIndex, expander);
-//                    }
-//                    data.indexToEncoded().put(paramIndex, paramAnnotation.encoded());
-//                    isHttpAnnotation = true;
-//                    if (!data.template().hasRequestVariable(name)) {
-//                        data.formParams().add(name);
-//                    }
-//                } else if (annotationType == QueryMap.class) {
-//                    checkState(data.queryMapIndex() == null,
-//                            "QueryMap annotation was present on multiple parameters.");
-//                    data.queryMapIndex(paramIndex);
-//                    data.queryMapEncoded(QueryMap.class.cast(annotation).encoded());
-//                    isHttpAnnotation = true;
-//                } else if (annotationType == HeaderMap.class) {
-//                    checkState(data.headerMapIndex() == null,
-//                            "HeaderMap annotation was present on multiple parameters.");
-//                    data.headerMapIndex(paramIndex);
-//                    isHttpAnnotation = true;
-//                }
-//            }
-            return isHttpAnnotation;
-        }
-
-        private static Map<String, Collection<String>> toMap(String[] input) {
-            Map<String, Collection<String>> result =
-                    new LinkedHashMap<String, Collection<String>>(input.length);
-            for (String header : input) {
-                int colon = header.indexOf(':');
-                String name = header.substring(0, colon);
-                if (!result.containsKey(name)) {
-                    result.put(name, new ArrayList<String>(1));
-                }
-                result.get(name).add(header.substring(colon + 1).trim());
-            }
-            return result;
-        }
-    }
 }

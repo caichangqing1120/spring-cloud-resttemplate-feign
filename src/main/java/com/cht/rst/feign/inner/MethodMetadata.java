@@ -1,245 +1,69 @@
-/**
- * Copyright 2012-2020 The Feign Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
 package com.cht.rst.feign.inner;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public final class MethodMetadata implements Serializable {
 
-  private static final long serialVersionUID = 1L;
-  private String configKey;
-  private transient Class<?> returnType;
-  private Integer urlIndex;
-  private Integer bodyIndex;
-  private Integer headerMapIndex;
-  private Integer queryMapIndex;
-  private boolean queryMapEncoded;
-  private transient Type bodyType;
-  private final ChtFeignRequestTemplate template = new ChtFeignRequestTemplate();
-  private final List<String> formParams = new ArrayList<>();
-  private final Map<Integer, Collection<String>> indexToName =  new LinkedHashMap<>();
-//  private final Map<Integer, Class<? extends Expander>> indexToExpanderClass = new LinkedHashMap<>();
-  private final Map<Integer, Boolean> indexToEncoded = new LinkedHashMap<>();
-//  private transient Map<Integer, Expander> indexToExpander;
-  private BitSet parameterToIgnore = new BitSet();
-  private boolean ignored;
-  private transient Class<?> targetType;
-  private transient Method method;
-  private transient final List<String> warnings = new ArrayList<>();
+    private static final long serialVersionUID = 1L;
+    private String configKey;
+    private transient Class<?> returnType;
+    private Integer bodyIndex; //requestBody位置
+    private final ChtFeignRequestTemplate template = new ChtFeignRequestTemplate();
+    private final List<String> formParams = new ArrayList<>();
+    //变量位置-变量名
+    private final Map<Integer, String> indexToName = new LinkedHashMap<>();
+    //uri变量位置
+    private final List<Integer> uriVariableIndex = new ArrayList<>();
 
-  MethodMetadata() {
-  }
+    MethodMetadata() {
+        template.methodMetadata(this);
+    }
 
-  public String configKey() {
-    return configKey;
-  }
+    public String configKey() {
+        return configKey;
+    }
 
-  public MethodMetadata configKey(String configKey) {
-    this.configKey = configKey;
-    return this;
-  }
+    public MethodMetadata configKey(String configKey) {
+        this.configKey = configKey;
+        return this;
+    }
 
-  public Class returnType() {
-    return returnType;
-  }
+    public Class returnType() {
+        return returnType;
+    }
 
-  public MethodMetadata returnType(Class returnType) {
-    this.returnType = returnType;
-    return this;
-  }
+    public MethodMetadata returnType(Class returnType) {
+        this.returnType = returnType;
+        return this;
+    }
 
-  public Integer urlIndex() {
-    return urlIndex;
-  }
+    public Integer bodyIndex() {
+        return bodyIndex;
+    }
 
-  public MethodMetadata urlIndex(Integer urlIndex) {
-    this.urlIndex = urlIndex;
-    return this;
-  }
+    public MethodMetadata bodyIndex(Integer bodyIndex) {
+        this.bodyIndex = bodyIndex;
+        return this;
+    }
 
-  public Integer bodyIndex() {
-    return bodyIndex;
-  }
+    public ChtFeignRequestTemplate template() {
+        return template;
+    }
 
-  public MethodMetadata bodyIndex(Integer bodyIndex) {
-    this.bodyIndex = bodyIndex;
-    return this;
-  }
+    public List<String> formParams() {
+        return formParams;
+    }
 
-  public Integer headerMapIndex() {
-    return headerMapIndex;
-  }
+    //返回参数名 与 他位置
+    public Map<Integer, String> indexToName() {
+        return indexToName;
+    }
 
-  public MethodMetadata headerMapIndex(Integer headerMapIndex) {
-    this.headerMapIndex = headerMapIndex;
-    return this;
-  }
-
-  public Integer queryMapIndex() {
-    return queryMapIndex;
-  }
-
-  public MethodMetadata queryMapIndex(Integer queryMapIndex) {
-    this.queryMapIndex = queryMapIndex;
-    return this;
-  }
-
-  public boolean queryMapEncoded() {
-    return queryMapEncoded;
-  }
-
-  public MethodMetadata queryMapEncoded(boolean queryMapEncoded) {
-    this.queryMapEncoded = queryMapEncoded;
-    return this;
-  }
-
-  /**
-   * Type corresponding to {@link #bodyIndex()}.
-   */
-  public Type bodyType() {
-    return bodyType;
-  }
-
-  public MethodMetadata bodyType(Type bodyType) {
-    this.bodyType = bodyType;
-    return this;
-  }
-
-  public ChtFeignRequestTemplate template() {
-    return template;
-  }
-
-  public List<String> formParams() {
-    return formParams;
-  }
-
-  public Map<Integer, Collection<String>> indexToName() {
-    return indexToName;
-  }
-
-  public Map<Integer, Boolean> indexToEncoded() {
-    return indexToEncoded;
-  }
-
-//  /**
-//   * If {@link #indexToExpander} is null, classes here will be instantiated by newInstance.
-//   */
-//  public Map<Integer, Class<? extends Expander>> indexToExpanderClass() {
-//    return indexToExpanderClass;
-//  }
-
-  /**
-   * After {@link #indexToExpanderClass} is populated, this is set by contracts that support runtime
-   * injection.
-   */
-//  public MethodMetadata indexToExpander(Map<Integer, Expander> indexToExpander) {
-//    this.indexToExpander = indexToExpander;
-//    return this;
-//  }
-
-  /**
-   * When not null, this value will be used instead of {@link #indexToExpander()}.
-   */
-//  public Map<Integer, Expander> indexToExpander() {
-//    return indexToExpander;
-//  }
-
-  /**
-   * @param i individual parameter that should be ignored
-   * @return this instance
-   */
-  public MethodMetadata ignoreParamater(int i) {
-    this.parameterToIgnore.set(i);
-    return this;
-  }
-
-  public BitSet parameterToIgnore() {
-    return parameterToIgnore;
-  }
-
-  public MethodMetadata parameterToIgnore(BitSet parameterToIgnore) {
-    this.parameterToIgnore = parameterToIgnore;
-    return this;
-  }
-
-  /**
-   * @param i individual parameter to check if should be ignored
-   * @return true when field should not be processed by feign
-   */
-  public boolean shouldIgnoreParamater(int i) {
-    return parameterToIgnore.get(i);
-  }
-
-//  /**
-//   * @param index
-//   * @return true if the parameter {@code index} was already consumed by a any
-//   *         {@link feign.MethodMetadata} holder
-//   */
-//  public boolean isAlreadyProcessed(Integer index) {
-//    return index.equals(urlIndex)
-//        || index.equals(bodyIndex)
-//        || index.equals(headerMapIndex)
-//        || index.equals(queryMapIndex)
-//        || indexToName.containsKey(index)
-//        || indexToExpanderClass.containsKey(index)
-//        || indexToEncoded.containsKey(index)
-//        || (indexToExpander != null && indexToExpander.containsKey(index))
-//        || parameterToIgnore.get(index);
-//  }
-
-  public void ignoreMethod() {
-    this.ignored = true;
-  }
-
-  public boolean isIgnored() {
-    return ignored;
-  }
-
-  public MethodMetadata targetType(Class<?> targetType) {
-    this.targetType = targetType;
-    return this;
-  }
-
-  public Class<?> targetType() {
-    return targetType;
-  }
-
-  public MethodMetadata method(Method method) {
-    this.method = method;
-    return this;
-  }
-
-  public Method method() {
-    return method;
-  }
-
-  public void addWarning(String warning) {
-    warnings.add(warning);
-  }
-
-  public String warnings() {
-    return warnings.stream()
-        .collect(Collectors.joining("\n- ", "\nWarnings:\n- ", ""));
-  }
-
+    public List<Integer> uriVariableIndex() {
+        return uriVariableIndex;
+    }
 }

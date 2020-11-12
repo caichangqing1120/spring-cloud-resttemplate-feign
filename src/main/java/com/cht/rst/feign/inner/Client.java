@@ -4,5 +4,5 @@ import java.io.IOException;
 
 public interface Client {
 
-    <T> T execute(ChtFeignRequestTemplate request, Object[] argv, Class<T> returnType) throws IOException;
+    <T> T execute(ChtFeignRequestTemplate request, Object[] argv) throws IOException;
 }
