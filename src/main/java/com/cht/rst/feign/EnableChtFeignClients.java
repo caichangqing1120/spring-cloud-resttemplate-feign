@@ -22,4 +22,7 @@ public @interface EnableChtFeignClients {
 
 
     String[] basePackages() default {};
+
+
+    Class<?>[] defaultConfiguration() default {};
 }

@@ -22,4 +22,6 @@ public @interface ChtFeignClient {
     String contextId() default "";
 
     String url() default "";
+
+    Class<?>[] configuration() default {};
 }

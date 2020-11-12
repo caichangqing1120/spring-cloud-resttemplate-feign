@@ -25,11 +25,19 @@ public class ChtFeignClientsConfiguration {
         return Retryer.NEVER_RETRY;
     }
 
+//    @Bean
+//    @ConditionalOnMissingBean(RestTemplate.class)
+//    public RestTemplate getRestTemplate() {
+//        return new RestTemplate();
+//    }
+
     @Bean
     @ConditionalOnBean(RestTemplate.class)
-    public Client feignClient(RestTemplate restTemplate) {
+    public Client chtFeignClient(RestTemplate restTemplate) {
+//        restTemplate.setMessageConverters();
         return new RestTemplateClient(restTemplate);
     }
+
 
     @Bean
     @Scope("prototype")

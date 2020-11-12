@@ -48,8 +48,24 @@ public class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar,
     @Override
     public void registerBeanDefinitions(AnnotationMetadata metadata,
                                         BeanDefinitionRegistry registry) {
-        //registerDefaultConfiguration(metadata, registry);
+        registerDefaultConfiguration(metadata, registry);
         registerFeignClients(metadata, registry);
+    }
+
+    private void registerDefaultConfiguration(AnnotationMetadata metadata,
+                                              BeanDefinitionRegistry registry) {
+        Map<String, Object> defaultAttrs = metadata.getAnnotationAttributes(EnableChtFeignClients.class.getName(), true);
+
+        if (defaultAttrs != null && defaultAttrs.containsKey("defaultConfiguration")) {
+            String name;
+            if (metadata.hasEnclosingClass()) {
+                name = "default." + metadata.getEnclosingClassName();
+            }
+            else {
+                name = "default." + metadata.getClassName();
+            }
+            registerClientConfiguration(registry, name, defaultAttrs.get("defaultConfiguration"));
+        }
     }
 
     public void registerFeignClients(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
