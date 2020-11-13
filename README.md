@@ -1,4 +1,8 @@
 # spring-cloud-resttemplate-feign
+======================
+[![Build Status](https://travis-ci.org/mybatis/spring.svg?branch=master)](https://travis-ci.org/mybatis/spring)
+[![Coverage Status](https://coveralls.io/repos/mybatis/spring/badge.svg?branch=master&service=github)](https://coveralls.io/github/mybatis/spring?branch=master)
+[![License](http://img.shields.io/:license-apache-brightgreen.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 This project is a easy way to using restful api by Spring's RestTemplate, just like spring-cloud-openfeign.
 It's using SpringMVC annotation by deafult.
