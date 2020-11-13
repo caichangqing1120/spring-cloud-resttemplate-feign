@@ -75,15 +75,6 @@ public interface AnnotatedParameterProcessor {
          */
         void setParameterName(String name);
 
-        void setUrivariableIndex();
-
-        /**
-         * Sets the template parameter.
-         *
-         * @param name the template parameter
-         * @param rest the existing parameter values
-         * @return parameters
-         */
-        Collection<String> setTemplateParameter(String name, Collection<String> rest);
+        void setUriVariableIndex();
     }
 }

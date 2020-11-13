@@ -27,7 +27,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -231,14 +230,8 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
         }
 
         @Override
-        public void setUrivariableIndex() {
+        public void setUriVariableIndex() {
             nameParam2(this.methodMetadata, this.parameterIndex);
-        }
-
-        @Override
-        public Collection<String> setTemplateParameter(String name,
-                                                       Collection<String> rest) {
-            return FeignUtils.addTemplateParameter(rest, name);
         }
     }
 }
