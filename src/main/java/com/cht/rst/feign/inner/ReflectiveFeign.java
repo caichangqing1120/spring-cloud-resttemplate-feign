@@ -44,8 +44,7 @@ public class ReflectiveFeign extends ChtFeign {
             }
         }
         InvocationHandler handler = factory.create(target, methodToHandler);
-        T proxy = (T) Proxy.newProxyInstance(target.type().getClassLoader(),
-                new Class<?>[]{target.type()}, handler);
+        T proxy = (T) Proxy.newProxyInstance(target.type().getClassLoader(), new Class<?>[]{target.type()}, handler);
 
         for (DefaultMethodHandler defaultMethodHandler : defaultMethodHandlers) {
             defaultMethodHandler.bindTo(proxy);

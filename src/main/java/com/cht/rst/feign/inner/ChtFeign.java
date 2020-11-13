@@ -62,8 +62,7 @@ public abstract class ChtFeign {
             SynchronousMethodHandler.Factory synchronousMethodHandlerFactory =
                     new SynchronousMethodHandler.Factory(client, retryer);
             ReflectiveFeign.ParseHandlersByName handlersByName =
-                    new ReflectiveFeign.ParseHandlersByName(contract, /*, options, encoder, decoder, queryMapEncoder,
-                            errorDecoder, */synchronousMethodHandlerFactory);
+                    new ReflectiveFeign.ParseHandlersByName(contract, synchronousMethodHandlerFactory);
             return new ReflectiveFeign(handlersByName, invocationHandlerFactory);
         }
     }
