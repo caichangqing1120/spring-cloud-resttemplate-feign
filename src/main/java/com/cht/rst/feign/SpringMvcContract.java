@@ -231,7 +231,13 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
 
         @Override
         public void setUriVariableIndex() {
-            nameParam2(this.methodMetadata, this.parameterIndex);
+            uriVariableIndex(this.methodMetadata, this.parameterIndex);
         }
+
+        @Override
+        public void setHeaderName(String name) {
+            headerNameParam(this.methodMetadata, name, this.parameterIndex);
+        }
+
     }
 }

@@ -18,6 +18,8 @@ public final class MethodMetadata implements Serializable {
     private final Map<Integer, String> indexToName = new LinkedHashMap<>();
     //uri变量位置
     private final List<Integer> uriVariableIndex = new ArrayList<>();
+    //headers
+    private final Map<Integer, String> indexToHeaderName = new LinkedHashMap<>();
 
     MethodMetadata() {
         template.methodMetadata(this);
@@ -65,5 +67,9 @@ public final class MethodMetadata implements Serializable {
 
     public List<Integer> uriVariableIndex() {
         return uriVariableIndex;
+    }
+
+    public Map<Integer, String> indexToHeaderName() {
+        return indexToHeaderName;
     }
 }

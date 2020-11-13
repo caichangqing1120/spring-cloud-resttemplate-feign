@@ -128,10 +128,13 @@ public interface Contract {
             data.indexToName().put(i, name);
         }
 
-        protected void nameParam2(MethodMetadata data, int i) {
-
+        protected void uriVariableIndex(MethodMetadata data, int i) {
             //添加位置
             data.uriVariableIndex().add(i);
+        }
+
+        protected void headerNameParam(MethodMetadata data, String name, int i) {
+            data.indexToHeaderName().put(i, name);
         }
 
     }

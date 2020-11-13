@@ -38,6 +38,12 @@ public class RestTemplateClient implements Client {
                 queryParams.put(entry.getValue(), argv[entry.getKey()].toString());
             }
         }
+        Map<String, String> headerParams = Maps.newHashMap();
+        if(!CollectionUtils.isEmpty(methodMetadata.indexToHeaderName())){
+            for (Map.Entry<Integer, String> entry : methodMetadata.indexToHeaderName().entrySet()) {
+                headerParams.put(entry.getValue(), argv[entry.getKey()].toString());
+            }
+        }
         String urlPart = request.getUrlPart();
 
         return delegate.execute(request.getMethod(),
@@ -46,6 +52,7 @@ public class RestTemplateClient implements Client {
                 requestBody,
                 returnType,
                 queryParams,
+                headerParams,
                 uriValues
         );
     }

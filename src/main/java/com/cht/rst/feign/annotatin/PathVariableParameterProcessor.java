@@ -22,8 +22,7 @@ public class PathVariableParameterProcessor implements AnnotatedParameterProcess
     public boolean processArgument(AnnotatedParameterContext context, Annotation annotation, Method method) {
 
         String name = ANNOTATION.cast(annotation).value();
-        checkState(emptyToNull(name) != null,"PathVariable annotation was empty on param %s.",
-                context.getParameterIndex());
+        checkState(emptyToNull(name) != null,"PathVariable annotation was empty on param %s.", context.getParameterIndex());
         context.setUriVariableIndex();
         return true;
     }

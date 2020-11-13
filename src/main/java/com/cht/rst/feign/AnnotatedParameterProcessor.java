@@ -20,7 +20,6 @@ import com.cht.rst.feign.inner.MethodMetadata;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Collection;
 
 /**
  * Feign contract method parameter processor.
@@ -76,5 +75,7 @@ public interface AnnotatedParameterProcessor {
         void setParameterName(String name);
 
         void setUriVariableIndex();
+
+        void setHeaderName(String name);
     }
 }

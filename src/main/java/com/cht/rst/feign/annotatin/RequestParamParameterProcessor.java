@@ -21,12 +21,9 @@ public class RequestParamParameterProcessor implements AnnotatedParameterProcess
     @Override
     public boolean processArgument(AnnotatedParameterContext context, Annotation annotation, Method method) {
 
-        int parameterIndex = context.getParameterIndex();
-
         RequestParam requestParam = ANNOTATION.cast(annotation);
         String name = requestParam.value();
-        checkState(emptyToNull(name) != null,
-                "RequestParam.value() was empty on parameter %s", parameterIndex);
+        checkState(emptyToNull(name) != null, "RequestParam.value() was empty on parameter %s", context.getParameterIndex());
         context.setParameterName(name);
         return true;
     }
