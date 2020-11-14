@@ -71,7 +71,9 @@ public class RetryableRestTemplate {
             default:
                 throw new UnsupportedOperationException(String.format("unsupported http method(method=%s)", method));
         }
-        logger.info("cht feign invocation, \n\turl={} \n\trequestBoy={} \n\theaders={} \n\turiVariables={} \n\tresult={}",
+        logger.info("\n\tThe detail of cht-feign invocation is: \n\turl={} \n\trequestBoy={} \n\theaders={} " +
+                        "\n\turiVariables={} " +
+                        "\n\tresult={}",
                 url,
                 JSONObject.toJSONString(request),
                 headerParams,
