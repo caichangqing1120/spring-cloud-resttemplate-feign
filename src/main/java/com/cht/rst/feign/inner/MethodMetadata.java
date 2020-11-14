@@ -11,15 +11,16 @@ public final class MethodMetadata implements Serializable {
     private static final long serialVersionUID = 1L;
     private String configKey;
     private transient Class<?> returnType;
-    private Integer bodyIndex; //requestBody位置
-    private final ChtFeignRequestTemplate template = new ChtFeignRequestTemplate();
-    private final List<String> formParams = new ArrayList<>();
+    //requestBody位置
+    private Integer bodyIndex;
     //变量位置-变量名
     private final Map<Integer, String> indexToName = new LinkedHashMap<>();
     //uri变量位置
     private final List<Integer> uriVariableIndex = new ArrayList<>();
     //headers
     private final Map<Integer, String> indexToHeaderName = new LinkedHashMap<>();
+
+    private final ChtFeignRequestTemplate template = new ChtFeignRequestTemplate();
 
     MethodMetadata() {
         template.methodMetadata(this);
@@ -55,11 +56,6 @@ public final class MethodMetadata implements Serializable {
     public ChtFeignRequestTemplate template() {
         return template;
     }
-
-    public List<String> formParams() {
-        return formParams;
-    }
-
     //返回参数名 与 他位置
     public Map<Integer, String> indexToName() {
         return indexToName;

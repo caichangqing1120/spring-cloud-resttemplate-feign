@@ -6,7 +6,6 @@ import static com.cht.rst.feign.inner.Util.checkNotNull;
 
 public class ChtFeignRequestTemplate<T> implements Serializable {
 
-
     private String baseUrl;
 
     private String urlPart;

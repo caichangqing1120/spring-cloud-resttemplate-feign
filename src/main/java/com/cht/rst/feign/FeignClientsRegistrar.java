@@ -46,6 +46,11 @@ public class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar,
     }
 
     @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
+
+    @Override
     public void registerBeanDefinitions(AnnotationMetadata metadata,
                                         BeanDefinitionRegistry registry) {
         registerDefaultConfiguration(metadata, registry);
@@ -89,8 +94,7 @@ public class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar,
                     Assert.isTrue(annotationMetadata.isInterface(),
                             "@ChtFeignClient can only be specified on an interface");
                     //get attributes from @ChtFeignClient
-                    Map<String, Object> attributes = annotationMetadata
-                            .getAnnotationAttributes(ChtFeignClient.class.getCanonicalName());
+                    Map<String, Object> attributes = annotationMetadata.getAnnotationAttributes(ChtFeignClient.class.getCanonicalName());
 
                     String name = getClientName(attributes);
                     registerClientConfiguration(registry, name, attributes.get("configuration"));
@@ -145,8 +149,7 @@ public class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar,
         String alias = contextId + "FeignClient";
         AbstractBeanDefinition beanDefinition = definition.getBeanDefinition();
 
-        BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDefinition, className,
-                new String[]{alias});
+        BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDefinition, className, new String[]{alias});
         BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
     }
 
@@ -250,19 +253,9 @@ public class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar,
                 basePackages.add(pkg);
             }
         }
-//        for (Class<?> clazz : (Class[]) attributes.get("basePackageClasses")) {
-//            basePackages.add(ClassUtils.getPackageName(clazz));
-//        }
-
         if (basePackages.isEmpty()) {
-            basePackages.add(
-                    ClassUtils.getPackageName(importingClassMetadata.getClassName()));
+            basePackages.add(ClassUtils.getPackageName(importingClassMetadata.getClassName()));
         }
         return basePackages;
-    }
-
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
     }
 }

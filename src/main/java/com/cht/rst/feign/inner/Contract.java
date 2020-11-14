@@ -21,7 +21,6 @@ public interface Contract {
      *
      * @param targetType {@link Target#type() type} of the Feign interface.
      */
-    // TODO: break this and correct spelling at some point
     List<MethodMetadata> parseAndValidateMetadata(Class<?> targetType);
 
     abstract class BaseContract implements Contract {
@@ -39,8 +38,9 @@ public interface Contract {
             Map<String, MethodMetadata> result = new LinkedHashMap<>();
             //
             for (Method method : targetType.getMethods()) {
-                if (method.getDeclaringClass() == Object.class || (method.getModifiers() & Modifier.STATIC) != 0 ||
-                        Util.isDefault(method)) {
+                if (method.getDeclaringClass() == Object.class
+                        || (method.getModifiers() & Modifier.STATIC) != 0
+                        || Util.isDefault(method)) {
                     continue;
                 }
                 MethodMetadata metadata = parseAndValidateMetadata(targetType, method);
@@ -49,14 +49,6 @@ public interface Contract {
                 result.put(metadata.configKey(), metadata);
             }
             return new ArrayList<>(result.values());
-        }
-
-        /**
-         * @deprecated use {@link #parseAndValidateMetadata(Class, Method)} instead.
-         */
-        @Deprecated
-        public MethodMetadata parseAndValidateMetadata(Method method) {
-            return parseAndValidateMetadata(method.getDeclaringClass(), method);
         }
 
         /**
@@ -75,23 +67,18 @@ public interface Contract {
             checkState(data.template().method() != null,
                     "Method %s not annotated with HTTP method type (ex. GET, POST)",
                     method.getName());
-            //参数类型
-            Class<?>[] parameterTypes = method.getParameterTypes();
-            //参数泛型类型
-            Type[] genericParameterTypes = method.getGenericParameterTypes();
             //参数注解
             Annotation[][] parameterAnnotations = method.getParameterAnnotations();
             int count = parameterAnnotations.length;
             for (int i = 0; i < count; i++) {
-                boolean isHttpAnnotation = false; //是否是http注解而非requestBody
+                //是否是http注解而非requestBody
+                boolean isHttpAnnotation = false;
                 if (parameterAnnotations[i] != null) {
                     //解析参数上的注解
                     isHttpAnnotation = processAnnotationsOnParameter(data, parameterAnnotations[i], i);
                 }
                 if (!isHttpAnnotation) {
                     //说明是requestBody
-                    checkState(data.formParams().isEmpty(),
-                            "Body parameters cannot be used with form parameters.");
                     checkState(data.bodyIndex() == null, "Method has too many Body parameters: %s", method);
                     data.bodyIndex(i);
                 }

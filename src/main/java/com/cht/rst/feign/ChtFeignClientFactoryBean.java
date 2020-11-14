@@ -43,8 +43,7 @@ public class ChtFeignClientFactoryBean
     protected <T> T get(ChtFeignContext context, Class<T> type) {
         T instance = context.getInstance(this.contextId, type);
         if (instance == null) {
-            throw new IllegalStateException("No bean found of type " + type + " for "
-                    + this.contextId);
+            throw new IllegalStateException("No bean found of type " + type + " for " + this.contextId);
         }
         return instance;
     }
