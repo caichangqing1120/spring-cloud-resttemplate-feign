@@ -3,7 +3,6 @@ package com.cht.rst.feign.inner;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,13 +19,14 @@ public interface Contract {
      * Called to parse the methods in the class that are linked to HTTP requests.
      *
      * @param targetType {@link Target#type() type} of the Feign interface.
+     * @param baseUrl {@link Target#url() url} of the Feign interface.
      */
-    List<MethodMetadata> parseAndValidateMetadata(Class<?> targetType);
+    List<MethodMetadata> parseAndValidateMetadata(Class<?> targetType, String baseUrl);
 
     abstract class BaseContract implements Contract {
 
         @Override
-        public List<MethodMetadata> parseAndValidateMetadata(Class<?> targetType) {
+        public List<MethodMetadata> parseAndValidateMetadata(Class<?> targetType, String baseUrl) {
             checkState(targetType.getTypeParameters().length == 0, "Parameterized types unsupported: %s",
                     targetType.getSimpleName());
             checkState(targetType.getInterfaces().length <= 1, "Only single inheritance supported: %s",
@@ -43,7 +43,7 @@ public interface Contract {
                         || Util.isDefault(method)) {
                     continue;
                 }
-                MethodMetadata metadata = parseAndValidateMetadata(targetType, method);
+                MethodMetadata metadata = parseAndValidateMetadata(targetType, baseUrl, method);
                 checkState(!result.containsKey(metadata.configKey()), "Overrides unsupported: %s",
                         metadata.configKey());
                 result.put(metadata.configKey(), metadata);
@@ -52,19 +52,19 @@ public interface Contract {
         }
 
         /**
-         * Called indirectly by {@link #parseAndValidateMetadata(Class)}.
+         * Called indirectly by {@link #parseAndValidateMetadata(Class, String)}.
          */
-        protected MethodMetadata parseAndValidateMetadata(Class<?> targetType, Method method) {
+        protected MethodMetadata parseAndValidateMetadata(Class<?> targetType, String baseUrl, Method method) {
 
             MethodMetadata data = new MethodMetadata();
             data.returnType(method.getGenericReturnType());
             data.configKey(ChtFeign.configKey(targetType, method));
-
+            data.baseUrl(baseUrl);
             for (Annotation methodAnnotation : method.getAnnotations()) {
                 //解析方法上的注解
                 processAnnotationOnMethod(data, methodAnnotation, method);
             }
-            checkState(data.template().method() != null,
+            checkState(data.method() != null,
                     "Method %s not annotated with HTTP method type (ex. GET, POST)",
                     method.getName());
             //参数注解

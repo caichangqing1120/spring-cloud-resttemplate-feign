@@ -23,11 +23,7 @@ public class SynchronousMethodHandler implements InvocationHandlerFactory.Method
 
     @Override
     public Object invoke(Object[] argv) throws Throwable {
-
-
-        ChtFeignRequestTemplate template = ChtFeignRequestTemplate.from(metadata.template());
-        target.apply(template);
-        return client.execute(template, argv);
+        return client.execute(metadata, argv);
     }
 
 

@@ -1,6 +1,7 @@
 package com.cht.rst.feign.inner;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.base.Joiner;
 
 import org.slf4j.Logger;
@@ -69,7 +70,7 @@ public class RetryableRestTemplate {
                 url,
                 JSONObject.toJSONString(request),
                 headerParams,
-                uriVariables,  JSONObject.toJSONString(result.getBody()));
+                uriVariables,  JSONObject.toJSONString(result.getBody(), SerializerFeature.WriteMapNullValue));
         return result.getBody();
     }
 

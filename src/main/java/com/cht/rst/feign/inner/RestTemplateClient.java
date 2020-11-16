@@ -25,9 +25,8 @@ public class RestTemplateClient implements Client {
     }
 
     @Override
-    public <T> T execute(ChtFeignRequestTemplate request, Object[] argv) {
+    public <T> T execute(MethodMetadata methodMetadata, Object[] argv) {
 
-        MethodMetadata methodMetadata = request.getMethodMetadata();
         Object requestBody = Objects.nonNull(argv) && Objects.nonNull(methodMetadata.bodyIndex()) ?
                 argv[methodMetadata.bodyIndex()] : null;
         Object[] uriValues = Objects.nonNull(argv) && !CollectionUtils.isEmpty(methodMetadata.uriVariableIndex()) ?
@@ -45,10 +44,10 @@ public class RestTemplateClient implements Client {
                 headerParams.put(entry.getValue(), argv[entry.getKey()].toString());
             }
         }
-        String urlPart = request.getUrlPart();
+        String urlPart = methodMetadata.getUrlPart();
 
-        return delegate.execute(request.getMethod(),
-                request.getBaseUrl(),
+        return delegate.execute(methodMetadata.getMethod(),
+                methodMetadata.getBaseUrl(),
                 urlPart,
                 requestBody,
                 returnType,

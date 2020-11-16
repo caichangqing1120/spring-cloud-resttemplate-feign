@@ -113,7 +113,7 @@ public class ReflectiveFeign extends ChtFeign {
 
         public Map<String, MethodHandler> apply(Target target) {
             //解析方法注解信息
-            List<MethodMetadata> metadata = contract.parseAndValidateMetadata(target.type());
+            List<MethodMetadata> metadata = contract.parseAndValidateMetadata(target.type(), target.url());
             Map<String, MethodHandler> result = new LinkedHashMap<>();
             for (MethodMetadata md : metadata) {
                 result.put(md.configKey(), factory.create(target, md));

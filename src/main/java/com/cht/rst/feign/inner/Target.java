@@ -11,8 +11,6 @@ public interface Target<T> {
 
     String url();
 
-    void apply(ChtFeignRequestTemplate input);
-
     class HardCodedTarget<T> implements Target<T> {
 
         private final Class<T> type;
@@ -42,12 +40,6 @@ public interface Target<T> {
         @Override
         public String url() {
             return url;
-        }
-
-        /* no authentication or other special activity. just insert the url. */
-        @Override
-        public void apply(ChtFeignRequestTemplate input) {
-            input.setBaseUrl(url());
         }
 
         @Override

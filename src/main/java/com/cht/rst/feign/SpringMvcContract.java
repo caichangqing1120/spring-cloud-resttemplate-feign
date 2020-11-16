@@ -76,10 +76,10 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
     }
 
     @Override
-    public MethodMetadata parseAndValidateMetadata(Class<?> targetType, Method method) {
+    public MethodMetadata parseAndValidateMetadata(Class<?> targetType, String baseUrl, Method method) {
 
         this.processedMethods.put(ChtFeign.configKey(targetType, method), method);
-        return super.parseAndValidateMetadata(targetType, method);
+        return super.parseAndValidateMetadata(targetType, baseUrl, method);
     }
 
     @Override
@@ -96,7 +96,7 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
             methods = new RequestMethod[]{RequestMethod.GET};
         }
         checkOne(method, methods, "method");
-        data.template().method(HttpMethod.valueOf(methods[0].name()));
+        data.method(HttpMethod.valueOf(methods[0].name()));
 
         // path
         checkAtMostOne(method, methodMapping.value(), "value");
@@ -106,11 +106,11 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
                 //解析url，使用spring环境中的变量
                 pathValue = resolve(pathValue);
                 // Append path from @RequestMapping if value is present on method
-                if (!pathValue.startsWith("/") && !data.template().path().endsWith("/")) {
+                if (!pathValue.startsWith("/") && !data.path().endsWith("/")) {
                     pathValue = "/" + pathValue;
                 }
                 //设置后url
-                data.template().setUrlPart(pathValue);
+                data.setUrlPart(pathValue);
             }
         }
     }

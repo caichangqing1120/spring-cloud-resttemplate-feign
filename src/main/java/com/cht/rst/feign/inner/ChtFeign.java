@@ -40,20 +40,32 @@ public abstract class ChtFeign {
         private Retryer retryer = new Retryer.Default();
         private InvocationHandlerFactory invocationHandlerFactory = new InvocationHandlerFactory.Default();
 
+        /**
+         * set custom retryer
+         * @param retryer the customized retryer
+         * @return this
+         */
         public ChtFeign.Builder retryer(Retryer retryer) {
             this.retryer = retryer;
             return this;
         }
 
+        /**
+         * set custom client
+         * @param client the customized client
+         * @return this
+         */
         public ChtFeign.Builder client(Client client) {
             this.client = client;
             return this;
         }
 
-        public <T> T target(Class<T> apiType, String url) {
-            return target(new Target.HardCodedTarget<T>(apiType, url));
-        }
-
+        /**
+         * generate the target proxy implement instance of this feign interface
+         * @param target the middle data
+         * @param <T> this feign interface
+         * @return this proxy implement
+         */
         public <T> T target(Target<T> target) {
             return build().newInstance(target);
         }
