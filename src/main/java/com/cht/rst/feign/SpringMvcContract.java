@@ -4,7 +4,6 @@ import com.cht.rst.feign.annotatin.PathVariableParameterProcessor;
 import com.cht.rst.feign.annotatin.RequestHeaderParameterProcessor;
 import com.cht.rst.feign.annotatin.RequestParamParameterProcessor;
 import com.cht.rst.feign.inner.ChtFeign;
-import com.cht.rst.feign.inner.ChtFeignRequestTemplate;
 import com.cht.rst.feign.inner.Contract;
 import com.cht.rst.feign.inner.MethodMetadata;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -17,6 +16,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -96,7 +96,7 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
             methods = new RequestMethod[]{RequestMethod.GET};
         }
         checkOne(method, methods, "method");
-        data.template().method(ChtFeignRequestTemplate.HttpMethod.valueOf(methods[0].name()));
+        data.template().method(HttpMethod.valueOf(methods[0].name()));
 
         // path
         checkAtMostOne(method, methodMapping.value(), "value");

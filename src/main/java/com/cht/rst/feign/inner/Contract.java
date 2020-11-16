@@ -57,7 +57,7 @@ public interface Contract {
         protected MethodMetadata parseAndValidateMetadata(Class<?> targetType, Method method) {
 
             MethodMetadata data = new MethodMetadata();
-            data.returnType(method.getReturnType());
+            data.returnType(method.getGenericReturnType());
             data.configKey(ChtFeign.configKey(targetType, method));
 
             for (Annotation methodAnnotation : method.getAnnotations()) {

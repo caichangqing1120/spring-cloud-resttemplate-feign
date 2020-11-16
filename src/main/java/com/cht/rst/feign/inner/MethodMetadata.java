@@ -1,6 +1,7 @@
 package com.cht.rst.feign.inner;
 
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,7 +11,7 @@ public final class MethodMetadata implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private String configKey;
-    private transient Class<?> returnType;
+    private transient Type returnType;
     //requestBody位置
     private Integer bodyIndex;
     //变量位置-变量名
@@ -35,11 +36,11 @@ public final class MethodMetadata implements Serializable {
         return this;
     }
 
-    public Class returnType() {
+    public Type returnType() {
         return returnType;
     }
 
-    public MethodMetadata returnType(Class returnType) {
+    public MethodMetadata returnType(Type returnType) {
         this.returnType = returnType;
         return this;
     }

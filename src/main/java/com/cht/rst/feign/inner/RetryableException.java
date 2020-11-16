@@ -1,6 +1,6 @@
 package com.cht.rst.feign.inner;
 
-import com.cht.rst.feign.inner.ChtFeignRequestTemplate.HttpMethod;
+import org.springframework.http.HttpMethod;
 
 import java.util.Date;
 
@@ -9,7 +9,7 @@ public class RetryableException extends FeignException {
     private static final long serialVersionUID = 1L;
 
     private final Long retryAfter;
-    private final ChtFeignRequestTemplate.HttpMethod httpMethod;
+    private final HttpMethod httpMethod;
 
     /**
      * @param retryAfter usually corresponds to the {@link Util#RETRY_AFTER} header.

@@ -3,16 +3,19 @@ package com.cht.rst.feign.inner;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
 
-import com.cht.rst.feign.inner.ChtFeignRequestTemplate.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriTemplateHandler;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Objects;
 
@@ -32,7 +35,7 @@ public class RetryableRestTemplate {
     }
 
     public <T> T execute(HttpMethod method, String baseUrl, String path, Object request,
-                         Class<T> responseType, Map<String, String> queryParams, Map<String, String> headerParams,
+                         Type responseType, Map<String, String> queryParams, Map<String, String> headerParams,
                          Object... uriVariables) {
         String uri = path;
         if (Objects.nonNull(uriVariables) && uriVariables.length > 0) {
@@ -48,37 +51,26 @@ public class RetryableRestTemplate {
     }
 
     private <T> T doExecute(HttpMethod method, String baseUrl, String path, Object request,
-                            Class<T> responseType, Map<String, String> headerParams, Object... uriVariables) {
+                            Type responseType, Map<String, String> headerParams, Object... uriVariables) {
         String url = baseUrl + path;
         HttpHeaders httpHeaders = new HttpHeaders();
         headerParams.forEach((k, v) -> httpHeaders.add(k, v));
         HttpEntity<Object> httpEntity = new HttpEntity<>(request, httpHeaders);
 
-        T result = null;
-        switch (method) {
-            case GET:
-                result = restTemplate.getForObject(url, responseType, uriVariables);
-                break;
-            case POST:
-                result = restTemplate.postForEntity(url, httpEntity, responseType, uriVariables).getBody();
-                break;
-            case PUT:
-                restTemplate.put(url, httpEntity, uriVariables);
-                break;
-            case DELETE:
-                restTemplate.delete(url, uriVariables);
-                break;
-            default:
-                throw new UnsupportedOperationException(String.format("unsupported http method(method=%s)", method));
-        }
+        ParameterizedTypeReference<T> objectParameterizedTypeReference =
+                ParameterizedTypeReference.forType(responseType);
+
+        ResponseEntity<T> result = restTemplate.exchange(url, method, httpEntity, objectParameterizedTypeReference,
+                uriVariables);
+
         logger.info("\n\tThe detail of cht-feign invocation is: \n\turl={} \n\trequestBoy={} \n\theaders={} " +
                         "\n\turiVariables={} " +
                         "\n\tresult={}",
                 url,
                 JSONObject.toJSONString(request),
                 headerParams,
-                uriVariables,  JSONObject.toJSONString(result));
-        return result;
+                uriVariables,  JSONObject.toJSONString(result.getBody()));
+        return result.getBody();
     }
 
 }

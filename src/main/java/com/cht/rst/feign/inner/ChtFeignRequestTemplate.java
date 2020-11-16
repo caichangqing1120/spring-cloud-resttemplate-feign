@@ -1,5 +1,7 @@
 package com.cht.rst.feign.inner;
 
+import org.springframework.http.HttpMethod;
+
 import java.io.Serializable;
 
 import static com.cht.rst.feign.inner.Util.checkNotNull;
@@ -13,10 +15,6 @@ public class ChtFeignRequestTemplate<T> implements Serializable {
     private HttpMethod method;
 
     private MethodMetadata methodMetadata;
-
-    public enum HttpMethod {
-        GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH
-    }
 
     public ChtFeignRequestTemplate() {
         super();

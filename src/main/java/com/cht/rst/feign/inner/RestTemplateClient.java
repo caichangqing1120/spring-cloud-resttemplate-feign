@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Objects;
 
@@ -31,7 +32,7 @@ public class RestTemplateClient implements Client {
                 argv[methodMetadata.bodyIndex()] : null;
         Object[] uriValues = Objects.nonNull(argv) && !CollectionUtils.isEmpty(methodMetadata.uriVariableIndex()) ?
                 methodMetadata.uriVariableIndex().stream().map(index -> argv[index]).toArray() : null;
-        Class<T> returnType = methodMetadata.returnType();
+        Type returnType = methodMetadata.returnType();
         Map<String, String> queryParams = Maps.newHashMap();
         if(!CollectionUtils.isEmpty(methodMetadata.indexToName())){
             for (Map.Entry<Integer, String> entry : methodMetadata.indexToName().entrySet()) {
