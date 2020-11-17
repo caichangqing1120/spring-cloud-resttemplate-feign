@@ -33,16 +33,22 @@ public class RestTemplateClient implements Client {
                 methodMetadata.uriVariableIndex().stream().map(index -> argv[index]).toArray() : null;
         Type returnType = methodMetadata.returnType();
         Map<String, String> queryParams = Maps.newHashMap();
-        if(!CollectionUtils.isEmpty(methodMetadata.indexToName())){
-            for (Map.Entry<Integer, String> entry : methodMetadata.indexToName().entrySet()) {
-                queryParams.put(entry.getValue(), String.valueOf(argv[entry.getKey()]));
-            }
+        Map<Integer, String> indexToName = methodMetadata.indexToName();
+        if (!indexToName.isEmpty()) {
+            indexToName.forEach((k, v) -> {
+                if (Objects.nonNull(argv[k])) {
+                    queryParams.put(v, String.valueOf(argv[k]));
+                }
+            });
         }
         Map<String, String> headerParams = Maps.newHashMap();
-        if(!CollectionUtils.isEmpty(methodMetadata.indexToHeaderName())){
-            for (Map.Entry<Integer, String> entry : methodMetadata.indexToHeaderName().entrySet()) {
-                headerParams.put(entry.getValue(), String.valueOf(argv[entry.getKey()]));
-            }
+        Map<Integer, String> indexToHeaderName = methodMetadata.indexToHeaderName();
+        if (!indexToHeaderName.isEmpty()) {
+            indexToHeaderName.forEach((k, v) -> {
+                if (Objects.nonNull(argv[k])) {
+                    headerParams.put(v, String.valueOf(argv[k]));
+                }
+            });
         }
         String urlPart = methodMetadata.getUrlPart();
 
