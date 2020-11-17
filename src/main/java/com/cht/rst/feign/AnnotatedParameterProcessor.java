@@ -8,8 +8,7 @@ import java.lang.reflect.Method;
 /**
  * Feign contract method parameter processor.
  *
- * @author Jakub Narloch
- * @author Abhijit Sarkar
+ * @author cht
  */
 public interface AnnotatedParameterProcessor {
 
@@ -33,7 +32,7 @@ public interface AnnotatedParameterProcessor {
     /**
      * Specifies the parameter context.
      *
-     * @author Jakub Narloch
+     * @author cht
      */
     interface AnnotatedParameterContext {
 

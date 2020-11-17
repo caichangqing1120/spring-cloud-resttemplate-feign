@@ -4,7 +4,7 @@ import com.cht.rst.feign.inner.ChtFeign;
 import com.cht.rst.feign.inner.Target;
 
 /**
- * @author Spencer Gibb
+ * @author cht
  */
 class DefaultTargeter implements Targeter {
 

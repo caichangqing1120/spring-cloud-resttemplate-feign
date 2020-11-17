@@ -6,8 +6,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * @author Dave Syer
- * @author Gregor Zurowski
+ * @author cht
  */
 class ChtFeignClientSpecification implements NamedContextFactory.Specification {
 

@@ -238,6 +238,5 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
         public void setHeaderName(String name) {
             headerNameParam(this.methodMetadata, name, this.parameterIndex);
         }
-
     }
 }
