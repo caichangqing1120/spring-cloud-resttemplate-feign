@@ -65,7 +65,7 @@ public class RetryableRestTemplate {
         ResponseEntity<T> result = restTemplate.exchange(url, method, httpEntity, objectParameterizedTypeReference,
                 uriVariables);
 
-        logger.info("\n\t CHT-FEIGN invocation cost {} ms: \n\turl={} \n\trequestBoy={} \n\theaders={}" +
+        logger.info("\n\t >>>>cht-feign<<< invocation cost {} ms: \n\turl={} \n\trequestBoy={} \n\theaders={}" +
                         " " +
                         "\n\turiVariables={} " +
                         "\n\tresult={}",
