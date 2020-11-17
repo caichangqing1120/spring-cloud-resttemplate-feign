@@ -65,14 +65,14 @@ public class RetryableRestTemplate {
         ResponseEntity<T> result = restTemplate.exchange(url, method, httpEntity, objectParameterizedTypeReference,
                 uriVariables);
 
-        logger.info("\n\t >>>>cht-feign<<< invocation cost {} ms: \n\turl={} \n\trequestBoy={} \n\theaders={}" +
+        logger.info("\n\tcht-feign invocation cost {} ms: \n\turl = {} \n\theaders = {} \n\trequestBoy = {}" +
                         " " +
-                        "\n\turiVariables={} " +
-                        "\n\tresult={}",
+                        "\n\turiVariables = {} " +
+                        "\n\tresult = {}",
                 System.currentTimeMillis()-startTime,
                 url,
-                JSONObject.toJSONString(request),
                 headerParams,
+                JSONObject.toJSONString(request),
                 uriVariables,  JSONObject.toJSONString(result.getBody(), SerializerFeature.WriteMapNullValue));
         return result.getBody();
     }
