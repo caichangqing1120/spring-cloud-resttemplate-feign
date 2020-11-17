@@ -53,6 +53,7 @@ public class RetryableRestTemplate {
 
     private <T> T doExecute(HttpMethod method, String baseUrl, String path, Object request,
                             Type responseType, Map<String, String> headerParams, Object... uriVariables) {
+        long startTime = System.currentTimeMillis();
         String url = baseUrl + path;
         HttpHeaders httpHeaders = new HttpHeaders();
         headerParams.forEach((k, v) -> httpHeaders.add(k, v));
@@ -64,9 +65,11 @@ public class RetryableRestTemplate {
         ResponseEntity<T> result = restTemplate.exchange(url, method, httpEntity, objectParameterizedTypeReference,
                 uriVariables);
 
-        logger.info("\n\tThe detail of cht-feign invocation is: \n\turl={} \n\trequestBoy={} \n\theaders={} " +
+        logger.info("\n\t CHT-FEIGN invocation cost {} ms: \n\turl={} \n\trequestBoy={} \n\theaders={}" +
+                        " " +
                         "\n\turiVariables={} " +
                         "\n\tresult={}",
+                System.currentTimeMillis()-startTime,
                 url,
                 JSONObject.toJSONString(request),
                 headerParams,
