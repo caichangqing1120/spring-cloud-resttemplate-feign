@@ -35,13 +35,13 @@ public class RestTemplateClient implements Client {
         Map<String, String> queryParams = Maps.newHashMap();
         if(!CollectionUtils.isEmpty(methodMetadata.indexToName())){
             for (Map.Entry<Integer, String> entry : methodMetadata.indexToName().entrySet()) {
-                queryParams.put(entry.getValue(), argv[entry.getKey()].toString());
+                queryParams.put(entry.getValue(), String.valueOf(argv[entry.getKey()]));
             }
         }
         Map<String, String> headerParams = Maps.newHashMap();
         if(!CollectionUtils.isEmpty(methodMetadata.indexToHeaderName())){
             for (Map.Entry<Integer, String> entry : methodMetadata.indexToHeaderName().entrySet()) {
-                headerParams.put(entry.getValue(), argv[entry.getKey()].toString());
+                headerParams.put(entry.getValue(), String.valueOf(argv[entry.getKey()]));
             }
         }
         String urlPart = methodMetadata.getUrlPart();
