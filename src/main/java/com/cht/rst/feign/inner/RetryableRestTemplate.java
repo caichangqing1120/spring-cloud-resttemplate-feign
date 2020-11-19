@@ -45,16 +45,12 @@ public class RetryableRestTemplate {
         if (!CollectionUtils.isEmpty(queryParams)) {
             uri = uri + "?" + MAP_JOINER.join(queryParams);
         }
-        if (Objects.nonNull(uriVariables) && uriVariables.length > 0) {
-            return doExecute(method, baseUrl, uri, request, responseType, headerParams, uriVariables);
-        }
-        return doExecute(method, baseUrl, uri, request, responseType, headerParams);
+        return doExecute(method, baseUrl + uri, request, responseType, headerParams);
     }
 
-    private <T> T doExecute(HttpMethod method, String baseUrl, String path, Object request,
+    private <T> T doExecute(HttpMethod method, String url, Object request,
                             Type responseType, Map<String, String> headerParams, Object... uriVariables) {
         long startTime = System.currentTimeMillis();
-        String url = baseUrl + path;
         HttpHeaders httpHeaders = new HttpHeaders();
         headerParams.forEach((k, v) -> httpHeaders.add(k, v));
         HttpEntity<Object> httpEntity = new HttpEntity<>(request, httpHeaders);
@@ -69,11 +65,11 @@ public class RetryableRestTemplate {
                         " " +
                         "\n\turiVariables = {} " +
                         "\n\tresult = {}",
-                System.currentTimeMillis()-startTime,
+                System.currentTimeMillis() - startTime,
                 url,
                 headerParams,
                 JSONObject.toJSONString(request),
-                uriVariables,  JSONObject.toJSONString(result.getBody(), SerializerFeature.WriteMapNullValue));
+                uriVariables, JSONObject.toJSONString(result.getBody(), SerializerFeature.WriteMapNullValue));
         return result.getBody();
     }
 
