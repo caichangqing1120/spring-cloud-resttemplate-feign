@@ -1,5 +1,9 @@
 package com.cht.rst.feign.inner;
 
+import com.cht.rst.feign.plugin.ChtFeignInterceptor;
+
+import java.util.Collection;
+
 import static com.cht.rst.feign.inner.Util.checkNotNull;
 
 public class SynchronousMethodHandler implements InvocationHandlerFactory.MethodHandler {
@@ -10,7 +14,8 @@ public class SynchronousMethodHandler implements InvocationHandlerFactory.Method
     private final Retryer retryer;
 
     private SynchronousMethodHandler(Target<?> target,
-                                     Client client, Retryer retryer,
+                                     Client client,
+                                     Retryer retryer,
                                      MethodMetadata metadata) {
 
         this.target = checkNotNull(target, "target");
@@ -32,8 +37,11 @@ public class SynchronousMethodHandler implements InvocationHandlerFactory.Method
         private final Client client;
         private final Retryer retryer;
 
-        Factory(Client client, Retryer retryer) {
+        Factory(Client client, Collection<ChtFeignInterceptor> interceptors, Retryer retryer) {
             this.client = checkNotNull(client, "client");
+            Collection<ChtFeignInterceptor> innerInterceptors =
+                    checkNotNull(interceptors, "interceptors");
+            client.addInterceptors(innerInterceptors);
             this.retryer = checkNotNull(retryer, "retryer");
         }
 

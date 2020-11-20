@@ -2,9 +2,15 @@ package com.cht.rst.feign.inner;
 
 
 import com.cht.rst.feign.SpringMvcContract;
+import com.cht.rst.feign.plugin.ChtFeignInterceptor;
+import com.cht.rst.feign.plugin.LoggerInterceptor;
+import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Objects;
 
 /**
  * ChtFeign is easy way for api invocation with restful fashion underling spring'restTemple to establish http
@@ -36,7 +42,8 @@ public abstract class ChtFeign {
     public static class Builder {
 
         private Contract contract = new SpringMvcContract();
-        private Client client = new RestTemplateClient();
+        private Client client;
+        private Collection<ChtFeignInterceptor> interceptors;
         private Retryer retryer = new Retryer.Default();
         private InvocationHandlerFactory invocationHandlerFactory = new InvocationHandlerFactory.Default();
 
@@ -61,6 +68,16 @@ public abstract class ChtFeign {
         }
 
         /**
+         * set custom interceptors
+         * @param interceptors the customized interceptors
+         * @return this
+         */
+        public ChtFeign.Builder interceptors(Collection<ChtFeignInterceptor> interceptors) {
+            this.interceptors = interceptors;
+            return this;
+        }
+
+        /**
          * generate the target proxy implement instance of this feign interface
          * @param target the middle data
          * @param <T> this feign interface
@@ -71,8 +88,15 @@ public abstract class ChtFeign {
         }
 
         public ChtFeign build() {
+            //set default
+            if (Objects.isNull(client)) {
+                client = new RestTemplateClient();
+            }
+            if (CollectionUtils.isEmpty(interceptors)) {
+                interceptors = Collections.singletonList(new LoggerInterceptor());
+            }
             SynchronousMethodHandler.Factory synchronousMethodHandlerFactory =
-                    new SynchronousMethodHandler.Factory(client, retryer);
+                    new SynchronousMethodHandler.Factory(client, interceptors, retryer);
             ReflectiveFeign.ParseHandlersByName handlersByName =
                     new ReflectiveFeign.ParseHandlersByName(contract, synchronousMethodHandlerFactory);
             return new ReflectiveFeign(handlersByName, invocationHandlerFactory);

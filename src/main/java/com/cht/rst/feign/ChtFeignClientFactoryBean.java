@@ -3,12 +3,22 @@ package com.cht.rst.feign;
 import com.cht.rst.feign.inner.ChtFeign;
 import com.cht.rst.feign.inner.Client;
 import com.cht.rst.feign.inner.Target;
+import com.cht.rst.feign.plugin.ChtFeignInterceptor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.annotation.Order;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 
 public class ChtFeignClientFactoryBean
         implements FactoryBean<Object>, InitializingBean, ApplicationContextAware {
@@ -32,6 +42,17 @@ public class ChtFeignClientFactoryBean
         if (client != null) {
             builder.client(client);
         }
+
+        Map<String, ChtFeignInterceptor> instances = context.getInstances(this.contextId, ChtFeignInterceptor.class);
+        if (Objects.nonNull(instances) && !CollectionUtils.isEmpty(instances.values())) {
+            Collection<ChtFeignInterceptor> values = instances.values().stream()
+                    .sorted((o1, o2) ->
+                            Optional.ofNullable(o2.getClass().getAnnotation(Order.class).value()).orElse(0)
+                                    - Optional.ofNullable(o1.getClass().getAnnotation(Order.class).value()).orElse(0))
+                    .collect(Collectors.toList());
+            builder.interceptors(values);
+        }
+
         return new DefaultTargeter().target(this, builder, context, new Target.HardCodedTarget<>(
                 this.type, this.name, url));
     }
