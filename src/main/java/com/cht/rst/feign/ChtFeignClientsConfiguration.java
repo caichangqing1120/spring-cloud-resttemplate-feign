@@ -1,9 +1,5 @@
 package com.cht.rst.feign;
 
-import com.alibaba.fastjson.serializer.SerializeConfig;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.alibaba.fastjson.support.config.FastJsonConfig;
-import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 import com.cht.rst.feign.inner.ChtFeign;
 import com.cht.rst.feign.inner.Client;
 import com.cht.rst.feign.inner.RestTemplateClient;
