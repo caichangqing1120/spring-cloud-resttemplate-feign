@@ -8,6 +8,7 @@ import com.cht.rst.feign.inner.ChtFeign;
 import com.cht.rst.feign.inner.Client;
 import com.cht.rst.feign.inner.RestTemplateClient;
 import com.cht.rst.feign.inner.Retryer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -19,11 +20,13 @@ import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Configuration
 public class ChtFeignClientsConfiguration {
+
+    @Autowired
+    private List<HttpMessageConverter<?>> converterList;
 
     @Bean
     @ConditionalOnMissingBean
@@ -31,42 +34,10 @@ public class ChtFeignClientsConfiguration {
         return Retryer.NEVER_RETRY;
     }
 
-    private HttpMessageConverter createFastJsonConverter() {
-
-        FastJsonHttpMessageConverter fastConverter = new FastJsonHttpMessageConverter();
-        FastJsonConfig fastJsonConfig = new FastJsonConfig();
-        SerializerFeature[] serializerFeatures = new SerializerFeature[]{
-                SerializerFeature.WriteMapNullValue,
-                SerializerFeature.WriteNullListAsEmpty,
-                SerializerFeature.WriteNullStringAsEmpty,
-                SerializerFeature.WriteNullBooleanAsFalse,
-                SerializerFeature.WriteDateUseDateFormat,
-                SerializerFeature.DisableCircularReferenceDetect};
-        SerializeConfig serializeConfig = SerializeConfig.globalInstance;
-        fastJsonConfig.setSerializeConfig(serializeConfig);
-        fastJsonConfig.setSerializerFeatures(serializerFeatures);
-        fastJsonConfig.setCharset(Charset.forName("UTF-8"));
-        fastJsonConfig.setDateFormat("yyyy-MM-dd HH:mm:ss");
-        fastConverter.setFastJsonConfig(fastJsonConfig);
-
-        List<MediaType> mediaTypes = new ArrayList();
-        mediaTypes.add(MediaType.APPLICATION_JSON);
-        mediaTypes.add(MediaType.APPLICATION_JSON_UTF8);
-        mediaTypes.add(new MediaType("application", "*+json", Charset.forName("UTF-8")));
-        fastConverter.setSupportedMediaTypes(mediaTypes);
-        return fastConverter;
-    }
-
-//    @Bean
-//    @ConditionalOnMissingBean(RestTemplate.class)
-//    public RestTemplate getRestTemplate() {
-//        return new RestTemplate();
-//    }
-
     @Bean
     @ConditionalOnBean(RestTemplate.class)
     public Client chtFeignClient(RestTemplate restTemplate) {
-        restTemplate.setMessageConverters(Collections.singletonList(createFastJsonConverter()));
+        restTemplate.setMessageConverters(converterList);
         return new RestTemplateClient(restTemplate);
     }
 
@@ -75,7 +46,7 @@ public class ChtFeignClientsConfiguration {
     @ConditionalOnMissingBean(RestTemplate.class)
     public Client chtFeignClient2() {
         RestTemplate restTemplate = new RestTemplate();
-        restTemplate.setMessageConverters(Collections.singletonList(createFastJsonConverter()));
+        restTemplate.setMessageConverters(converterList);
         return new RestTemplateClient(restTemplate);
     }
 
