@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-public class LoggerInterceptor implements ChtFeignInterceptor {
+public class DefautInterceptor implements ChtFeignInterceptor {
 
-    private Logger logger = LoggerFactory.getLogger(LoggerInterceptor.class);
+    private Logger logger = LoggerFactory.getLogger(DefautInterceptor.class);
 
     private long startTime;
 

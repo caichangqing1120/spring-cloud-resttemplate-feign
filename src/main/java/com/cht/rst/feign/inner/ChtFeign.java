@@ -3,7 +3,7 @@ package com.cht.rst.feign.inner;
 
 import com.cht.rst.feign.SpringMvcContract;
 import com.cht.rst.feign.plugin.ChtFeignInterceptor;
-import com.cht.rst.feign.plugin.LoggerInterceptor;
+import com.cht.rst.feign.plugin.DefautInterceptor;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
@@ -93,7 +93,7 @@ public abstract class ChtFeign {
                 client = new RestTemplateClient();
             }
             if (CollectionUtils.isEmpty(interceptors)) {
-                interceptors = Collections.singletonList(new LoggerInterceptor());
+                interceptors = Collections.singletonList(new DefautInterceptor());
             }
             SynchronousMethodHandler.Factory synchronousMethodHandlerFactory =
                     new SynchronousMethodHandler.Factory(client, interceptors, retryer);
