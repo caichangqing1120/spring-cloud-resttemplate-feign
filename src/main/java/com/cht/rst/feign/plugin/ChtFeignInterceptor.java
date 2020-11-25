@@ -11,7 +11,7 @@ public interface ChtFeignInterceptor {
         //HttpMethod httpMethod = (HttpMethod) args[0];
         String url = (String) args[1];
         Boolean isFile = (Boolean) args[5];
-        Object requestBody = args[2];
+        Object requestBody = !isFile ? args[2] : null;
         Map<String, String> headerParams = (Map<String, String>) args[4];
 
         preProcess(url, requestBody, headerParams);

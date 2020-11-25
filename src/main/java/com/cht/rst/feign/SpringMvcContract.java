@@ -1,5 +1,6 @@
 package com.cht.rst.feign;
 
+import com.cht.rst.feign.annotatin.FileParameterProcessor;
 import com.cht.rst.feign.annotatin.PathVariableParameterProcessor;
 import com.cht.rst.feign.annotatin.RequestHeaderParameterProcessor;
 import com.cht.rst.feign.annotatin.RequestParamParameterProcessor;
@@ -178,6 +179,7 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
         annotatedArgumentResolvers.add(new PathVariableParameterProcessor());
         annotatedArgumentResolvers.add(new RequestParamParameterProcessor());
         annotatedArgumentResolvers.add(new RequestHeaderParameterProcessor());
+        annotatedArgumentResolvers.add(new FileParameterProcessor());
 
         return annotatedArgumentResolvers;
     }
@@ -237,6 +239,11 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
         @Override
         public void setHeaderName(String name) {
             headerNameParam(this.methodMetadata, name, this.parameterIndex);
+        }
+
+        @Override
+        public void setFileIndex(String name) {
+            fileNameParam(this.methodMetadata, name, this.parameterIndex);
         }
     }
 }

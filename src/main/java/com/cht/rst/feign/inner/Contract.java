@@ -1,5 +1,7 @@
 package com.cht.rst.feign.inner;
 
+import javafx.util.Pair;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -122,6 +124,10 @@ public interface Contract {
 
         protected void headerNameParam(MethodMetadata data, String name, int i) {
             data.indexToHeaderName().put(i, name);
+        }
+
+        protected void fileNameParam(MethodMetadata data, String name, int i) {
+            data.fileIndex(new Pair(i, name));
         }
 
     }

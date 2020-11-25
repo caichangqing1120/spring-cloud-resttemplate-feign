@@ -60,5 +60,7 @@ public interface AnnotatedParameterProcessor {
         void setUriVariableIndex();
 
         void setHeaderName(String name);
+
+        void setFileIndex(String name);
     }
 }

@@ -1,12 +1,12 @@
 package com.cht.rst.feign.inner;
 
+import javafx.util.Pair;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.Objects;
 
 
 public class RetryableRestTemplate implements RestClient {
@@ -28,9 +29,9 @@ public class RetryableRestTemplate implements RestClient {
 
     @Override
     public <T> T doExecute(HttpMethod method, String url, Object request, Type responseType,
-                           Map<String, String> headerParams, boolean isFile) throws IOException {
+                           Map<String, String> headerParams, Pair<Integer, String> fileIndex) throws IOException {
         Object requestCopy;
-        if (isFile) {
+        if (Objects.nonNull(fileIndex)) {
             MultipartFile multipartFile = (MultipartFile) request;
             ByteArrayResource file = new ByteArrayResource(multipartFile.getBytes()) {
                 @Override
@@ -39,7 +40,7 @@ public class RetryableRestTemplate implements RestClient {
                 }
             };
             MultiValueMap fileMultiValueMap = new LinkedMultiValueMap(1);
-            fileMultiValueMap.add("file", file);
+            fileMultiValueMap.add(fileIndex.getValue(), file);
             requestCopy = fileMultiValueMap;
         } else {
             requestCopy = request;

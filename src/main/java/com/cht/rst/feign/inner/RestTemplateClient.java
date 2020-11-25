@@ -4,6 +4,7 @@ import com.cht.rst.feign.plugin.ChtFeignInterceptor;
 import com.cht.rst.feign.plugin.Plugin;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
+import javafx.util.Pair;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -44,11 +45,11 @@ public class RestTemplateClient implements Client {
 
     public <T> T execute(MethodMetadata methodMetadata, Object[] argv) throws IOException {
 
-        Integer fileIndex = methodMetadata.fileIndex();
+        Pair<Integer, String> fileIndex = methodMetadata.fileIndex();
         Integer bodyIndex = methodMetadata.bodyIndex();
         boolean isFile = Objects.nonNull(fileIndex);
 
-        Object requestBody = isFile ? (Objects.nonNull(argv) ? argv[fileIndex] : null) :
+        Object requestBody = isFile ? (Objects.nonNull(argv) ? argv[fileIndex.getKey()] : null) :
                 (Objects.nonNull(argv) && Objects.nonNull(bodyIndex) ? argv[bodyIndex] : null);
 
         Object[] uriValues = Objects.nonNull(argv) && !CollectionUtils.isEmpty(methodMetadata.uriVariableIndex()) ?
@@ -82,6 +83,6 @@ public class RestTemplateClient implements Client {
             uri = uri + "?" + MAP_JOINER.join(queryParams);
         }
         return delegate.doExecute(methodMetadata.getMethod(), methodMetadata.getBaseUrl() + uri,
-                requestBody, returnType, headerParams, isFile);
+                requestBody, returnType, headerParams, fileIndex);
     }
 }

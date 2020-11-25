@@ -1,5 +1,6 @@
 package com.cht.rst.feign.inner;
 
+import javafx.util.Pair;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.StringUtils;
 
@@ -20,7 +21,7 @@ public final class MethodMetadata implements Serializable {
     //requestBody位置
     private Integer bodyIndex;
     //file位置
-    private Integer fileIndex;
+    private Pair<Integer, String> fileIndex;
     //变量位置-变量名
     private final Map<Integer, String> indexToName = new LinkedHashMap<>();
     //uri变量位置
@@ -64,11 +65,11 @@ public final class MethodMetadata implements Serializable {
         return this;
     }
 
-    public Integer fileIndex() {
+    public Pair<Integer, String> fileIndex() {
         return fileIndex;
     }
 
-    public MethodMetadata fileIndex(Integer fileIndex) {
+    public MethodMetadata fileIndex(Pair<Integer, String> fileIndex) {
         this.fileIndex = fileIndex;
         return this;
     }
