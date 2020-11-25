@@ -170,7 +170,7 @@ public class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar,
         contextId = resolve(contextId);
         if (hasLoadedContextIds.contains(contextId)) {
             throw new IllegalStateException("ContextId resolved from @" + ChtFeignClient.class.getSimpleName() +
-                    "must unique");
+                    " must unique");
         }
         hasLoadedContextIds.add(contextId);
         return contextId;
