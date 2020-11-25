@@ -162,15 +162,15 @@ public class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar,
     }
 
     private String getContextId(Map<String, Object> attributes) {
+
         String contextId = (String) attributes.get("contextId");
         if (!StringUtils.hasText(contextId)) {
-            return getName(attributes);
+            contextId = getName(attributes);
         }
-
         contextId = resolve(contextId);
         if (hasLoadedContextIds.contains(contextId)) {
             throw new IllegalStateException("ContextId resolved from @" + ChtFeignClient.class.getSimpleName() +
-                    "must unique");
+                    " must unique");
         }
         hasLoadedContextIds.add(contextId);
         return contextId;
