@@ -10,6 +10,7 @@ public interface ChtFeignInterceptor {
 
         //HttpMethod httpMethod = (HttpMethod) args[0];
         String url = (String) args[1];
+        Boolean isFile = (Boolean) args[5];
         Object requestBody = args[2];
         Map<String, String> headerParams = (Map<String, String>) args[4];
 

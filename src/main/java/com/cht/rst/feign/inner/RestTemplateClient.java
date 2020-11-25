@@ -8,6 +8,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Map;
@@ -41,12 +42,19 @@ public class RestTemplateClient implements Client {
         this.delegate = (RestClient) Plugin.wrap(delegate, interceptors);
     }
 
-    public <T> T execute(MethodMetadata methodMetadata, Object[] argv) {
+    public <T> T execute(MethodMetadata methodMetadata, Object[] argv) throws IOException {
 
-        Object requestBody = Objects.nonNull(argv) && Objects.nonNull(methodMetadata.bodyIndex()) ?
-                argv[methodMetadata.bodyIndex()] : null;
+        Integer fileIndex = methodMetadata.fileIndex();
+        Integer bodyIndex = methodMetadata.bodyIndex();
+        boolean isFile = Objects.nonNull(fileIndex);
+
+        Object requestBody = isFile ? (Objects.nonNull(argv) ? argv[fileIndex] : null) :
+                (Objects.nonNull(argv) && Objects.nonNull(bodyIndex) ? argv[bodyIndex] : null);
+
         Object[] uriValues = Objects.nonNull(argv) && !CollectionUtils.isEmpty(methodMetadata.uriVariableIndex()) ?
                 methodMetadata.uriVariableIndex().stream().map(index -> argv[index]).toArray() : null;
+
+
         Type returnType = methodMetadata.returnType();
         Map<String, String> queryParams = Maps.newHashMap();
         Map<Integer, String> indexToName = methodMetadata.indexToName();
@@ -74,6 +82,6 @@ public class RestTemplateClient implements Client {
             uri = uri + "?" + MAP_JOINER.join(queryParams);
         }
         return delegate.doExecute(methodMetadata.getMethod(), methodMetadata.getBaseUrl() + uri,
-                requestBody, returnType, headerParams);
+                requestBody, returnType, headerParams, isFile);
     }
 }

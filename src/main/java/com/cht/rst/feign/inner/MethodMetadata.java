@@ -19,6 +19,8 @@ public final class MethodMetadata implements Serializable {
     private transient Type returnType;
     //requestBody位置
     private Integer bodyIndex;
+    //file位置
+    private Integer fileIndex;
     //变量位置-变量名
     private final Map<Integer, String> indexToName = new LinkedHashMap<>();
     //uri变量位置
@@ -59,6 +61,15 @@ public final class MethodMetadata implements Serializable {
 
     public MethodMetadata bodyIndex(Integer bodyIndex) {
         this.bodyIndex = bodyIndex;
+        return this;
+    }
+
+    public Integer fileIndex() {
+        return fileIndex;
+    }
+
+    public MethodMetadata fileIndex(Integer fileIndex) {
+        this.fileIndex = fileIndex;
         return this;
     }
 
