@@ -20,8 +20,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Map;
@@ -32,6 +30,8 @@ public class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar,
 
     // patterned after Spring Integration IntegrationComponentScanRegistrar
     // and RibbonClientsConfigurationRegistgrar
+
+    private Set<String> hasLoadedContextIds = new HashSet<>();
 
     private ResourceLoader resourceLoader;
 
@@ -65,8 +65,7 @@ public class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar,
             String name;
             if (metadata.hasEnclosingClass()) {
                 name = "default." + metadata.getEnclosingClassName();
-            }
-            else {
+            } else {
                 name = "default." + metadata.getClassName();
             }
             registerClientConfiguration(registry, name, defaultAttrs.get("defaultConfiguration"));
@@ -107,29 +106,12 @@ public class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar,
 
     private void registerClientConfiguration(BeanDefinitionRegistry registry, Object name,
                                              Object configuration) {
-        BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(ChtFeignClientSpecification.class);
+        BeanDefinitionBuilder builder =
+                BeanDefinitionBuilder.genericBeanDefinition(ChtFeignClientSpecification.class);
         builder.addConstructorArgValue(name);
         builder.addConstructorArgValue(configuration);
         registry.registerBeanDefinition(name + "." + ChtFeignClientSpecification.class.getSimpleName(),
                 builder.getBeanDefinition());
-    }
-
-    private String getClientName(Map<String, Object> client) {
-        if (client == null) {
-            return null;
-        }
-        String value = (String) client.get("contextId");
-        if (!StringUtils.hasText(value)) {
-            value = (String) client.get("value");
-        }
-        if (!StringUtils.hasText(value)) {
-            value = (String) client.get("name");
-        }
-        if (StringUtils.hasText(value)) {
-            return value;
-        }
-
-        throw new IllegalStateException("Either 'name' or 'value' must be provided in @" + ChtFeignClient.class.getSimpleName());
     }
 
     private void registerFeignClient(BeanDefinitionRegistry registry,
@@ -153,16 +135,30 @@ public class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar,
         BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
     }
 
-    private String getName(Map<String, Object> attributes) {
-        String name = (String) attributes.get("serviceId");
-        if (!StringUtils.hasText(name)) {
-            name = (String) attributes.get("name");
+    private String getClientName(Map<String, Object> client) {
+        if (client == null) {
+            return null;
         }
+        String value = (String) client.get("contextId");
+        if (!StringUtils.hasText(value)) {
+            value = (String) client.get("value");
+        }
+        if (!StringUtils.hasText(value)) {
+            value = (String) client.get("name");
+        }
+        if (StringUtils.hasText(value)) {
+            return value;
+        }
+
+        throw new IllegalStateException("Either 'name' or 'value' must be provided in @" + ChtFeignClient.class.getSimpleName());
+    }
+
+    private String getName(Map<String, Object> attributes) {
+        String name = (String) attributes.get("name");
         if (!StringUtils.hasText(name)) {
             name = (String) attributes.get("value");
         }
-        name = resolve(name);
-        return getName(name);
+        return resolve(name);
     }
 
     private String getContextId(Map<String, Object> attributes) {
@@ -172,28 +168,12 @@ public class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar,
         }
 
         contextId = resolve(contextId);
-        return getName(contextId);
-    }
-
-    static String getName(String name) {
-        if (!StringUtils.hasText(name)) {
-            return "";
+        if (hasLoadedContextIds.contains(contextId)) {
+            throw new IllegalStateException("ContextId resolved from @" + ChtFeignClient.class.getSimpleName() +
+                    "must unique");
         }
-
-        String host = null;
-        try {
-            String url;
-            if (!name.startsWith("http://") && !name.startsWith("https://")) {
-                url = "http://" + name;
-            } else {
-                url = name;
-            }
-            host = new URI(url).getHost();
-
-        } catch (URISyntaxException e) {
-        }
-        Assert.state(host != null, "Service id not legal hostname (" + name + ")");
-        return name;
+        hasLoadedContextIds.add(contextId);
+        return contextId;
     }
 
     private String resolve(String value) {
