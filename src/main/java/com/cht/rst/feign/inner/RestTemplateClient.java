@@ -1,30 +1,46 @@
 package com.cht.rst.feign.inner;
 
+import com.cht.rst.feign.plugin.ChtFeignInterceptor;
+import com.cht.rst.feign.plugin.Plugin;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.cht.rst.feign.inner.Util.checkNotNull;
+
 public class RestTemplateClient implements Client {
 
-    private final RetryableRestTemplate delegate;
+    private Joiner.MapJoiner MAP_JOINER = Joiner.on("&").withKeyValueSeparator("=");
+
+    private RestClient delegate;
 
     public RestTemplateClient() {
         this(new RetryableRestTemplate(new RestTemplate()));
+
     }
 
     public RestTemplateClient(RestTemplate restTemplate) {
         this(new RetryableRestTemplate(restTemplate));
+
     }
 
     private RestTemplateClient(RetryableRestTemplate delegate) {
+        checkNotNull(delegate, "restTemplate must not null");
         this.delegate = delegate;
     }
 
     @Override
+    public void addInterceptors(Collection<ChtFeignInterceptor> interceptors) {
+        this.delegate = (RestClient) Plugin.wrap(delegate, interceptors);
+    }
+
     public <T> T execute(MethodMetadata methodMetadata, Object[] argv) {
 
         Object requestBody = Objects.nonNull(argv) && Objects.nonNull(methodMetadata.bodyIndex()) ?
@@ -50,16 +66,14 @@ public class RestTemplateClient implements Client {
                 }
             });
         }
-        String urlPart = methodMetadata.getUrlPart();
-
-        return delegate.execute(methodMetadata.getMethod(),
-                methodMetadata.getBaseUrl(),
-                urlPart,
-                requestBody,
-                returnType,
-                queryParams,
-                headerParams,
-                uriValues
-        );
+        String uri = methodMetadata.getUrlPart();
+        if (Objects.nonNull(uriValues) && uriValues.length > 0) {
+            uri = new DefaultUriBuilderFactory().expand(uri, uriValues).getPath();
+        }
+        if (!CollectionUtils.isEmpty(queryParams)) {
+            uri = uri + "?" + MAP_JOINER.join(queryParams);
+        }
+        return delegate.doExecute(methodMetadata.getMethod(), methodMetadata.getBaseUrl() + uri,
+                requestBody, returnType, headerParams);
     }
 }
