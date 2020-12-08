@@ -9,6 +9,7 @@ It's using SpringMVC annotation by deafult.
 Welcome some excellecnt gays join in to improve the functions.
 
 ### Useing Example
+* 1 step：Introducing Maven dependencies
 ```maven
 	<dependency>
 		<groupId>com.cht</groupId>
@@ -16,17 +17,8 @@ Welcome some excellecnt gays join in to improve the functions.
 		<version>1.0.3-RELEASE</version>
 	</dependency>
 ```
-
-```java
-@SpringBootApplication
-@EnableChtFeignClients
-public class DemoApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
-	}
-}
-```
+* 2 step： Define your business java interface,
+notes: value or name of annotation @ChtFeignClient must be unique
 ```java
 @ChtFeignClient(value = "xxx-gateway-api", url = "http://localhost:8081")
 public interface ChtTestFeignClient {
@@ -38,6 +30,7 @@ public interface ChtTestFeignClient {
                                              @PathVariable("bbb") String bbb);
 }
 ```
+* 3 step：use this bean just like generally spring bean
 ```java
 @RestController
 public class DemoController {
@@ -58,5 +51,16 @@ public class DemoController {
         return chtTestFeignClient.ttt1("token", demoDto, "xxx", "yyy");
 
     }
+}
+```
+* 4 step : Of course, you should enable this rest-feign features by using @EnableChtFeignClients
+```java
+@SpringBootApplication
+@EnableChtFeignClients
+public class DemoApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(DemoApplication.class, args);
+	}
 }
 ```
