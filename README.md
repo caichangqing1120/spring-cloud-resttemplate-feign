@@ -1,4 +1,4 @@
-#spring-cloud-resttemplate-feign
+<h2>spring-cloud-resttemplate-feign</h2>
 
 [![Build Status](https://travis-ci.org/mybatis/spring.svg?branch=master)](https://travis-ci.org/mybatis/spring)
 [![License](http://img.shields.io/:license-apache-brightgreen.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
@@ -17,8 +17,8 @@ Welcome some excellecnt gays join in to improve the functions.
 		<version>1.0.3-RELEASE</version>
 	</dependency>
 ```
-* 2 step： Define your business java interface,
-notes: value or name of annotation @ChtFeignClient must be unique
+* 2 step： Define your business java interface<br>
+<font color=#00ffff size=72>notes</font>: value or name of annotation @ChtFeignClient must be unique
 ```java
 @ChtFeignClient(value = "xxx-gateway-api", url = "http://localhost:8081")
 public interface ChtTestFeignClient {
