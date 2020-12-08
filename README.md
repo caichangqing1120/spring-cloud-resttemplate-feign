@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/mybatis/spring.svg?branch=master)](https://travis-ci.org/mybatis/spring)
 [![License](http://img.shields.io/:license-apache-brightgreen.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
-This project is a easy way to using restful api by Spring's RestTemplate, just like spring-cloud-openfeign.
+This project is a convenient way to using restful api by Spring's RestTemplate, just like spring-cloud-openfeign.
 It's using SpringMVC annotation by deafult.
 
 Welcome some excellecnt gays join in to improve the functions.
