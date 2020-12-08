@@ -30,7 +30,7 @@ public interface ChtTestFeignClient {
                                              @PathVariable("bbb") String bbb);
 }
 ```
-* 3 step：use this bean just like generally spring bean
+* 3 step：Using this bean just like generally spring bean
 ```java
 @RestController
 public class DemoController {
