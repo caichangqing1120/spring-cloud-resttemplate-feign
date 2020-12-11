@@ -2,6 +2,7 @@ package com.cht.rst.feign;
 
 import com.cht.rst.feign.inner.ChtFeign;
 import com.cht.rst.feign.inner.Client;
+import com.cht.rst.feign.inner.Logger;
 import com.cht.rst.feign.inner.Target;
 import com.cht.rst.feign.plugin.ChtFeignInterceptor;
 import org.springframework.beans.BeansException;
@@ -42,6 +43,7 @@ public class ChtFeignClientFactoryBean
         if (client != null) {
             builder.client(client);
         }
+        builder.logger(get(context, Logger.class));
 
         Map<String, ChtFeignInterceptor> instances = context.getInstances(this.contextId, ChtFeignInterceptor.class);
         if (Objects.nonNull(instances) && !CollectionUtils.isEmpty(instances.values())) {

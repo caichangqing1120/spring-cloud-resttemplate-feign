@@ -9,5 +9,5 @@ public interface Client {
 
     void addInterceptors(Collection<ChtFeignInterceptor> interceptors);
 
-    <T> T execute(MethodMetadata request, Object[] argv) throws IOException;
+    <T> T execute(MethodMetadata request, Object[] argv, Logger logger) throws IOException;
 }

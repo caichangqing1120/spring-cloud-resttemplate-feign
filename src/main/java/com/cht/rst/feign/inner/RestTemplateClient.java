@@ -4,6 +4,7 @@ import com.cht.rst.feign.plugin.ChtFeignInterceptor;
 import com.cht.rst.feign.plugin.Plugin;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -12,6 +13,7 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import static com.cht.rst.feign.inner.Util.checkNotNull;
 
@@ -20,6 +22,8 @@ public class RestTemplateClient implements Client {
     private Joiner.MapJoiner MAP_JOINER = Joiner.on("&").withKeyValueSeparator("=");
 
     private RestClient delegate;
+
+    private Logger logger;
 
     public RestTemplateClient() {
         this(new RetryableRestTemplate(new RestTemplate()));
@@ -41,7 +45,7 @@ public class RestTemplateClient implements Client {
         this.delegate = (RestClient) Plugin.wrap(delegate, interceptors);
     }
 
-    public <T> T execute(MethodMetadata methodMetadata, Object[] argv) {
+    public <T> T execute(MethodMetadata methodMetadata, Object[] argv, Logger logger) {
 
         Object requestBody = Objects.nonNull(argv) && Objects.nonNull(methodMetadata.bodyIndex()) ?
                 argv[methodMetadata.bodyIndex()] : null;
@@ -73,7 +77,16 @@ public class RestTemplateClient implements Client {
         if (!CollectionUtils.isEmpty(queryParams)) {
             uri = uri + "?" + MAP_JOINER.join(queryParams);
         }
-        return delegate.doExecute(methodMetadata.getMethod(), methodMetadata.getBaseUrl() + uri,
+        HttpMethod method = methodMetadata.getMethod();
+        String finalUrl = methodMetadata.getBaseUrl() + uri;
+        //requestBody
+        //headerParams
+        long start = System.nanoTime();
+        logger.logRequestStr(methodMetadata.configKey(), method, finalUrl, requestBody, headerParams);
+        T t = delegate.doExecute(method, finalUrl,
                 requestBody, returnType, headerParams);
+        long elapsedTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+        logger.logResponseStr(methodMetadata.configKey(), t, elapsedTime);
+        return t;
     }
 }

@@ -3,18 +3,16 @@ package com.cht.rst.feign.inner;
 
 import com.cht.rst.feign.SpringMvcContract;
 import com.cht.rst.feign.plugin.ChtFeignInterceptor;
-import com.cht.rst.feign.plugin.DefautInterceptor;
-import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Objects;
 
 /**
  * ChtFeign is easy way for api invocation with restful fashion underling spring'restTemple to establish http
  * connections
+ *
  * @author cht
  */
 public abstract class ChtFeign {
@@ -45,10 +43,12 @@ public abstract class ChtFeign {
         private Client client;
         private Collection<ChtFeignInterceptor> interceptors;
         private Retryer retryer = new Retryer.Default();
+        private Logger logger = new Logger.NoOpLogger();
         private InvocationHandlerFactory invocationHandlerFactory = new InvocationHandlerFactory.Default();
 
         /**
          * set custom retryer
+         *
          * @param retryer the customized retryer
          * @return this
          */
@@ -59,6 +59,7 @@ public abstract class ChtFeign {
 
         /**
          * set custom client
+         *
          * @param client the customized client
          * @return this
          */
@@ -68,7 +69,19 @@ public abstract class ChtFeign {
         }
 
         /**
+         * set custom logger
+         *
+         * @param logger the customized logger
+         * @return this
+         */
+        public Builder logger(Logger logger) {
+            this.logger = logger;
+            return this;
+        }
+
+        /**
          * set custom interceptors
+         *
          * @param interceptors the customized interceptors
          * @return this
          */
@@ -79,8 +92,9 @@ public abstract class ChtFeign {
 
         /**
          * generate the target proxy implement instance of this feign interface
+         *
          * @param target the middle data
-         * @param <T> this feign interface
+         * @param <T>    this feign interface
          * @return this proxy implement
          */
         public <T> T target(Target<T> target) {
@@ -92,11 +106,11 @@ public abstract class ChtFeign {
             if (Objects.isNull(client)) {
                 client = new RestTemplateClient();
             }
-            if (CollectionUtils.isEmpty(interceptors)) {
-                interceptors = Collections.singletonList(new DefautInterceptor());
-            }
+//            if (CollectionUtils.isEmpty(interceptors)) {
+//                interceptors = Collections.singletonList(new DefautInterceptor());
+//            }
             SynchronousMethodHandler.Factory synchronousMethodHandlerFactory =
-                    new SynchronousMethodHandler.Factory(client, interceptors, retryer);
+                    new SynchronousMethodHandler.Factory(client, interceptors, retryer, logger);
             ReflectiveFeign.ParseHandlersByName handlersByName =
                     new ReflectiveFeign.ParseHandlersByName(contract, synchronousMethodHandlerFactory);
             return new ReflectiveFeign(handlersByName, invocationHandlerFactory);
