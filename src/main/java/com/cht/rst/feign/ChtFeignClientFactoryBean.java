@@ -43,7 +43,10 @@ public class ChtFeignClientFactoryBean
         if (client != null) {
             builder.client(client);
         }
-        builder.logger(get(context, Logger.class));
+        //logger
+        FeignLoggerFactory loggerFactory = get(context, FeignLoggerFactory.class);
+        Logger logger = loggerFactory.create(this.type);
+        builder.logger(logger);
 
         Map<String, ChtFeignInterceptor> instances = context.getInstances(this.contextId, ChtFeignInterceptor.class);
         if (Objects.nonNull(instances) && !CollectionUtils.isEmpty(instances.values())) {

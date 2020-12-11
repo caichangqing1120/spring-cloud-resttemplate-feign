@@ -2,6 +2,7 @@ package com.cht.rst.feign;
 
 import com.cht.rst.feign.inner.ChtFeign;
 import com.cht.rst.feign.inner.Client;
+import com.cht.rst.feign.inner.Logger;
 import com.cht.rst.feign.inner.RestTemplateClient;
 import com.cht.rst.feign.inner.Retryer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,12 @@ public class ChtFeignClientsConfiguration {
     @ConditionalOnMissingBean
     public Retryer feignRetryer() {
         return Retryer.NEVER_RETRY;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public Logger feignLogger() {
+        return new Logger.NoOpLogger();
     }
 
     @Bean
