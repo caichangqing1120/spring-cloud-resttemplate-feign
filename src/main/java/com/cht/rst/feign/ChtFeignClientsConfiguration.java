@@ -31,7 +31,7 @@ public class ChtFeignClientsConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public Logger feignLogger() {
-        return new Logger.NoOpLogger();
+        return new Logger.DefaultLooger();
     }
 
     @Bean

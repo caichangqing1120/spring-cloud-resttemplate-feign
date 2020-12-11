@@ -43,7 +43,7 @@ public abstract class ChtFeign {
         private Client client;
         private Collection<ChtFeignInterceptor> interceptors;
         private Retryer retryer = new Retryer.Default();
-        private Logger logger = new Logger.NoOpLogger();
+        private Logger logger = new Logger.DefaultLooger();
         private InvocationHandlerFactory invocationHandlerFactory = new InvocationHandlerFactory.Default();
 
         /**

@@ -86,7 +86,7 @@ public class RestTemplateClient implements Client {
         T t = delegate.doExecute(method, finalUrl,
                 requestBody, returnType, headerParams);
         long elapsedTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
-        logger.logResponse(methodMetadata.configKey(), t, elapsedTime);
+        logger.logResponse(methodMetadata.configKey(), method, finalUrl, requestBody, headerParams, t, elapsedTime);
         return t;
     }
 }
