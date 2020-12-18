@@ -125,31 +125,5 @@
         </plugins>
     </build>
 
-    <distributionManagement>
-        <repository>
-            <id>t3repostory</id>
-            <name>Nexus Release Repository</name>
-            <url>http://172.16.3.243/repository/maven-releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>t3snapshots</id>
-            <name>Nexus Release Repository</name>
-            <url>http://172.16.3.243/repository/maven-snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
-
-    <repositories>
-        <repository>
-            <id>t3repostory</id>
-            <url>http://172.16.3.243/repository/maven-public/</url>
-            <snapshots>
-                <updatePolicy>always</updatePolicy>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-    </repositories>
 
 </project>
