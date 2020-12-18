@@ -5,8 +5,8 @@
     <groupId>com.cht</groupId>
     <artifactId>spring-cloud-resttemplate-feign</artifactId>
     <version>1.0.6-RELEASE</version>
-    <name>CHT Spring cloud RestTemplate Feign</name>
-    <description>CHT Spring cloud RestTemplate Feign</description>
+    <name>Spring cloud RestTemplate Feign</name>
+    <description>The Feign for Spring cloud RestTemplate to simply http invocation</description>
     <parent>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-build</artifactId>
@@ -26,6 +26,10 @@
         <developer>
             <name>cht</name>
             <email>muyunisawesome@126.com</email>
+        </developer>
+        <developer>
+            <name>ccq</name>
+            <email>ccq1120@gmail.com</email>
         </developer>
     </developers>
 
