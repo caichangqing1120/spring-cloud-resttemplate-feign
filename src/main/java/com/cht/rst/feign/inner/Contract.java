@@ -53,6 +53,9 @@ public interface Contract {
 
         /**
          * Called indirectly by {@link #parseAndValidateMetadata(Class, String)}.
+         * @param targetType targetType
+         * @param baseUrl baseUrl
+         * @param method method
          */
         protected MethodMetadata parseAndValidateMetadata(Class<?> targetType, String baseUrl, Method method) {
 

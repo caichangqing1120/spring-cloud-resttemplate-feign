@@ -2,6 +2,7 @@ package com.cht.rst.feign;
 
 import com.cht.rst.feign.inner.ChtFeign;
 import com.cht.rst.feign.inner.Client;
+import com.cht.rst.feign.inner.FeignLoggerFactory;
 import com.cht.rst.feign.inner.Logger;
 import com.cht.rst.feign.inner.Target;
 import com.cht.rst.feign.plugin.ChtFeignInterceptor;

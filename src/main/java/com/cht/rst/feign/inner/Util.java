@@ -122,6 +122,8 @@ public class Util {
 
     /**
      * Identifies a method as a default instance method.
+     *
+     * @param method method
      */
     public static boolean isDefault(Method method) {
         // Default methods are public non-abstract, non-synthetic, and non-static instance methods
@@ -195,8 +197,7 @@ public class Util {
 
     /**
      * Resolves the last type parameter of the parameterized {@code supertype}, based on the {@code
-     * genericContext}, into its upper bounds.
-     * <p/>
+     * genericContext}, into its upper bounds.<p></p>
      * Implementation copied from {@code
      * retrofit.RestMethodInfo}.
      *
@@ -288,6 +289,9 @@ public class Util {
 
     /**
      * Adapted from {@code com.google.common.io.ByteStreams.toByteArray()}.
+     *
+     * @param in in
+     * @return byte[]
      */
     public static byte[] toByteArray(InputStream in) throws IOException {
         checkNotNull(in, "in");

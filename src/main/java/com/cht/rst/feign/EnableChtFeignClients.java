@@ -16,7 +16,6 @@ public @interface EnableChtFeignClients {
 
     /**
      * Alias for the {@link #basePackages()} attribute
-     * @return
      */
     String[] value() default {};
 
