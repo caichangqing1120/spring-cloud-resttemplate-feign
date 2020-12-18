@@ -1,4 +1,4 @@
-package com.cht.rst.feign.inner;
+package com.cht.rst.feign.inner.logger;
 
 import org.springframework.http.HttpMethod;
 
@@ -29,8 +29,5 @@ public interface Logger {
         INFO,
         WARN,
         ERROR
-    }
-
-    class DefaultLooger implements Logger {
     }
 }

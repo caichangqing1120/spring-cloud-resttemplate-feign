@@ -1,4 +1,4 @@
-package com.cht.rst.feign.inner;
+package com.cht.rst.feign.inner.logger;
 
 public class DefaultFeignLoggerFactory implements FeignLoggerFactory {
 
@@ -10,7 +10,7 @@ public class DefaultFeignLoggerFactory implements FeignLoggerFactory {
 
     @Override
     public Logger create(Class<?> type) {
-        return this.logger != null ? this.logger : new Logger.DefaultLooger();
+        return this.logger != null ? this.logger : new DefaultLogger(type);
     }
 
 }

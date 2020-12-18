@@ -1,5 +1,6 @@
 package com.cht.rst.feign.inner;
 
+import com.cht.rst.feign.inner.logger.Logger;
 import com.cht.rst.feign.plugin.ChtFeignInterceptor;
 import com.cht.rst.feign.plugin.Plugin;
 import com.google.common.base.Joiner;
@@ -22,8 +23,6 @@ public class RestTemplateClient implements Client {
     private Joiner.MapJoiner MAP_JOINER = Joiner.on("&").withKeyValueSeparator("=");
 
     private RestClient delegate;
-
-    private Logger logger;
 
     public RestTemplateClient() {
         this(new RetryableRestTemplate(new RestTemplate()));

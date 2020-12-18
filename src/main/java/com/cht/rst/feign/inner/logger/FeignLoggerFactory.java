@@ -1,6 +1,4 @@
-package com.cht.rst.feign.inner;
-
-import com.cht.rst.feign.inner.Logger;
+package com.cht.rst.feign.inner.logger;
 
 public interface FeignLoggerFactory {
 

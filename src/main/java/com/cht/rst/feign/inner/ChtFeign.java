@@ -2,6 +2,8 @@ package com.cht.rst.feign.inner;
 
 
 import com.cht.rst.feign.SpringMvcContract;
+import com.cht.rst.feign.inner.logger.DefaultLogger;
+import com.cht.rst.feign.inner.logger.Logger;
 import com.cht.rst.feign.plugin.ChtFeignInterceptor;
 
 import java.lang.reflect.Method;
@@ -43,7 +45,7 @@ public abstract class ChtFeign {
         private Client client;
         private Collection<ChtFeignInterceptor> interceptors;
         private Retryer retryer = new Retryer.Default();
-        private Logger logger = new Logger.DefaultLooger();
+        private Logger logger = new DefaultLogger(DefaultLogger.class);
         private InvocationHandlerFactory invocationHandlerFactory = new InvocationHandlerFactory.Default();
 
         /**

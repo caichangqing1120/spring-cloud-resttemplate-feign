@@ -1,5 +1,6 @@
 package com.cht.rst.feign.inner;
 
+import com.cht.rst.feign.inner.logger.Logger;
 import com.cht.rst.feign.plugin.ChtFeignInterceptor;
 import org.springframework.util.CollectionUtils;
 

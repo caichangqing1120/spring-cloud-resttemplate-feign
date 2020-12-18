@@ -2,9 +2,10 @@ package com.cht.rst.feign;
 
 import com.cht.rst.feign.inner.ChtFeign;
 import com.cht.rst.feign.inner.Client;
-import com.cht.rst.feign.inner.DefaultFeignLoggerFactory;
-import com.cht.rst.feign.inner.FeignLoggerFactory;
-import com.cht.rst.feign.inner.Logger;
+import com.cht.rst.feign.inner.logger.DefaultFeignLoggerFactory;
+import com.cht.rst.feign.inner.logger.DefaultLogger;
+import com.cht.rst.feign.inner.logger.FeignLoggerFactory;
+import com.cht.rst.feign.inner.logger.Logger;
 import com.cht.rst.feign.inner.RestTemplateClient;
 import com.cht.rst.feign.inner.Retryer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,13 @@ public class ChtFeignClientsConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public Logger feignLogger() {
-        return new Logger.DefaultLooger();
+        return new DefaultLogger();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(FeignLoggerFactory.class)
+    public FeignLoggerFactory feignLoggerFactory() {
+        return new DefaultFeignLoggerFactory(logger);
     }
 
     @Bean
@@ -92,16 +99,9 @@ public class ChtFeignClientsConfiguration {
         return new RestTemplateClient(restTemplate);
     }
 
-
     @Bean
     @Scope("prototype")
     public ChtFeign.Builder feignBuilder(Retryer retryer) {
         return ChtFeign.builder().retryer(retryer);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(FeignLoggerFactory.class)
-    public FeignLoggerFactory feignLoggerFactory() {
-        return new DefaultFeignLoggerFactory(logger);
     }
 }
